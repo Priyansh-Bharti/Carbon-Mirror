@@ -53,3 +53,14 @@ coverage/
 *.njsproj
 *.sln
 *.sw?
+
+# Screenshots & test artifacts
+screenshot_*.png
+test-results/
+
+# Scratch / one-off scripts (not part of the app)
+scratch/
+capture_screenshots.cjs
+integration_audit.cjs
+manifest_script.cjs
+public/update_links.cjs
