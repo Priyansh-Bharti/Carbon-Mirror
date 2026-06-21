@@ -86,3 +86,32 @@ export function formatCO2(kg) {
   }
   return `${Number((kg / 1000.0).toFixed(2))}T`;
 }
+
+/**
+ * Aggregates projected savings and computes a simulated planet score based on committed actions.
+ * Abstracted from UI to enforce strict Separation of Concerns.
+ * @param {Object} baselineFootprint - The user's baseline footprint object.
+ * @param {Array<string>} selectedActionIds - Array of selected action keys from ACTIONS.
+ * @returns {Object} An object containing totalSavedKgPerYear, totalSavedRupeesPerMonth, and simulatedFootprint.
+ */
+export function aggregateProjectedSavings(baselineFootprint, selectedActionIds) {
+  let totalSavedKgPerYear = 0;
+  let totalSavedRupeesPerMonth = 0;
+  const simulatedFootprint = { ...baselineFootprint };
+
+  if (Array.isArray(selectedActionIds) && baselineFootprint) {
+    selectedActionIds.forEach(actionId => {
+      const impact = calculateActionImpact(actionId, simulatedFootprint);
+      if (!(impact instanceof Error)) {
+        const annualKgSaved = impact.kgSavedPerMonth * 12.0;
+        totalSavedKgPerYear += annualKgSaved;
+        totalSavedRupeesPerMonth += impact.rupeeSavedPerMonth;
+        
+        simulatedFootprint.totalKgPerYear = Math.max(0, simulatedFootprint.totalKgPerYear - annualKgSaved);
+        simulatedFootprint.planetScore = kgToPlanetScore(simulatedFootprint.totalKgPerYear);
+      }
+    });
+  }
+
+  return { totalSavedKgPerYear, totalSavedRupeesPerMonth, simulatedFootprint };
+}

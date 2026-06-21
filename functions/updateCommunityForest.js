@@ -5,6 +5,7 @@
  */
 
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { logger } from 'firebase-functions/v2';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 /**
@@ -20,8 +21,7 @@ export const updateCommunityForestHandler = onSchedule('every 1 hour', async (_e
   }
 
   await batch.commit();
-  // eslint-disable-next-line no-console
-  console.log('Hourly community forest aggregates updated.');
+  logger.info('Hourly community forest aggregates updated.');
 });
 
 /**

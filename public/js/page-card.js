@@ -6,7 +6,7 @@
 
 import { listenToAuthState } from './auth.js';
 import { getUserProfile } from './firestore.js';
-import { logger } from './utils.js';
+import { logger, showNotification } from './utils.js';
 
 /**
  * Draws the visual planet sphere on the card canvas.
@@ -15,6 +15,7 @@ import { logger } from './utils.js';
  * @param {number} cy - Center Y.
  * @param {number} r - Radius.
  * @param {number} score - User score.
+ * @returns {void}
  */
 function drawCardGlobe(ctx, cx, cy, r, score) {
   const grad = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
@@ -45,6 +46,7 @@ function drawCardGlobe(ctx, cx, cy, r, score) {
  * @param {CanvasRenderingContext2D} ctx - The canvas context.
  * @param {Object} profile - User profile.
  * @param {number} total - Annual carbon footprint.
+ * @returns {void}
  */
 function drawCardText(ctx, profile, total) {
   const score = profile.footprint?.planetScore ?? 100;
@@ -78,6 +80,7 @@ function drawCardText(ctx, profile, total) {
  * Renders the full high-resolution card canvas.
  * @param {HTMLCanvasElement} canvas - Target canvas.
  * @param {Object} profile - User profile.
+ * @returns {void}
  */
 function renderCard(canvas, profile) {
   const ctx = canvas.getContext('2d');
@@ -127,12 +130,12 @@ function shareCard(canvas) {
           title: 'My Carbon Mirror Planet',
           text: 'I just generated my digital carbon footprint planet card! Take the quiz and see yours!'
         });
-      } catch (err) {
-        logger.error('Web Share failed.', { message: err.message });
+      } catch (shareError) {
+        logger.error('Web Share failed.', { message: shareError.message });
       }
     } else {
       await navigator.clipboard.writeText(window.location.origin);
-      alert('Sharing is not supported in this browser. App URL copied to clipboard instead!');
+      showNotification('Sharing is not supported in this browser. App URL copied to clipboard instead!');
     }
   });
 }

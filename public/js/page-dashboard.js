@@ -8,8 +8,9 @@ import { listenToAuthState } from './auth.js';
 import { getFirestore, collection, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 import { getUserProfile } from './firestore.js';
 import { formatCO2 } from './carbon-utils.js';
-import { logger, announceToScreenReader, debounce, sanitizeHTML } from './utils.js';
+import { logger, announceToScreenReader, debounce, sanitizeHTML, showNotification } from './utils.js';
 import { calculateTotalFootprint } from './carbon.js';
+import { DEFAULT_BASELINE_FOOTPRINT } from './constants.js';
 
 /** Debounced Firestore read — prevents duplicate fetches on rapid auth state changes. */
 const debouncedLoadLogs = debounce(loadAndRenderLogs, 300);
@@ -18,6 +19,7 @@ const debouncedLoadLogs = debounce(loadAndRenderLogs, 300);
  * Animates a circle progress ring.
  * @param {string} ringId - ID of the SVG circle element.
  * @param {number} percent - Percentage value (0-100).
+ * @returns {void}
  */
 function setRingPercent(ringId, percent) {
   const ring = document.getElementById(ringId);
@@ -32,6 +34,7 @@ function setRingPercent(ringId, percent) {
  * Renders the three categories' progress rings.
  * @param {Object} breakdown - Category breakdown in kg/yr.
  * @param {number} total - Total annual emissions.
+ * @returns {void}
  */
 function renderEmissionsRings(breakdown, total) {
   if (!breakdown || total <= 0) {return;}
@@ -55,6 +58,7 @@ function renderEmissionsRings(breakdown, total) {
  * Renders the comparison bar.
  * @param {number} userVal - User footprint in kg/yr.
  * @param {number} avgVal - Region average footprint in kg/yr.
+ * @returns {void}
  */
 function renderComparisonBar(userVal, avgVal) {
   const userBar = document.getElementById('comparison-bar-user');
@@ -72,6 +76,7 @@ function renderComparisonBar(userVal, avgVal) {
 /**
  * Populates the daily logs carbon story timeline.
  * @param {Array<Object>} logs - List of log data.
+ * @returns {void}
  */
 function renderTimeline(logs) {
   const container = document.getElementById('dashboard-timeline');
@@ -98,39 +103,41 @@ function renderTimeline(logs) {
  * Loads carbon story timeline logs from Firestore.
  * Extracted from loadDashboardData to allow debouncing.
  * @param {string} userId - Auth user ID.
+ * @returns {Promise<void>}
  */
 async function loadAndRenderLogs(userId) {
   try {
     const db = getFirestore();
     const logsRef = collection(db, 'users', userId, 'logs');
-    const q = query(logsRef, orderBy('__name__', 'desc'), limit(5));
-    const logsSnap = await getDocs(q);
-    const logs = logsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const recentLogsQuery = query(logsRef, orderBy('__name__', 'desc'), limit(5));
+    const logsSnap = await getDocs(recentLogsQuery);
+    const logs = logsSnap.docs.map(docSnapshot => ({ id: docSnapshot.id, ...docSnapshot.data() }));
     renderTimeline(logs);
-  } catch (err) {
-    logger.error('Failed to load user logs.', { message: err.message });
+  } catch (loadError) {
+    logger.error('Failed to load user logs.', { message: loadError.message });
   }
 }
 
 /**
  * Loads dashboard data from Firestore and updates the DOM.
  * @param {string} userId - Auth user ID.
+ * @returns {Promise<void>}
  */
 async function loadDashboardData(userId) {
   const profile = await getUserProfile(userId);
   if (!profile || !profile.quizAnswers) {
     logger.info('No quiz answers found. Redirecting user to quiz onboarding.');
-    alert('Please complete your baseline quiz to view your Dashboard!');
+    showNotification('Please complete your baseline quiz to view your Dashboard!');
     window.location.href = 'quiz';
     return;
   }
   let footprint = profile.footprint;
   if (!footprint && profile.quizAnswers) {
-    const calc = calculateTotalFootprint(profile.quizAnswers);
-    if (!(calc instanceof Error)) {footprint = calc;}
+    const calculationResult = calculateTotalFootprint(profile.quizAnswers);
+    if (!(calculationResult instanceof Error)) {footprint = calculationResult;}
   }
   if (!footprint) {
-    footprint = { totalKgPerYear: 2200, breakdown: { transport: 800, home: 800, food: 600 }, planetScore: 50, planetState: 'stressed' };
+    footprint = { ...DEFAULT_BASELINE_FOOTPRINT };
   }
   const total = footprint.totalKgPerYear;
   const score = footprint.planetScore ?? 50;
@@ -165,8 +172,8 @@ export function initDashboardPage() {
       await loadDashboardData(user.uid);
       if (skeleton) {skeleton.style.display = 'none';}
       if (content) {content.style.display = 'block';}
-    } catch (err) {
-      logger.error('Failed to load dashboard data.', { message: err.message });
+    } catch (dashboardLoadError) {
+      logger.error('Failed to load dashboard data.', { message: dashboardLoadError.message });
     }
   });
 }

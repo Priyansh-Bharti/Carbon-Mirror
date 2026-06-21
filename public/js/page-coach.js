@@ -8,12 +8,14 @@ import { listenToAuthState } from './auth.js';
 import { getUserProfile } from './firestore.js';
 import { askCoach } from './gemini.js';
 import { logger, sanitizeHTML } from './utils.js';
+import { DEFAULT_BASELINE_FOOTPRINT } from './constants.js';
 
 let chatHistory = [];
 let messageCount = Number(sessionStorage.getItem('cm_coach_message_count') || 0);
 
 /**
  * Updates the rate limit counter in the UI.
+ * @returns {void}
  */
 function updateRateLimitUI() {
   const badge = document.getElementById('coach-rate-limit-badge');
@@ -26,6 +28,7 @@ function updateRateLimitUI() {
  * Appends a message to the conversation log and saves history.
  * @param {string} role - 'user' or 'coach'.
  * @param {string} text - Message text.
+ * @returns {void}
  */
 function appendMessage(role, text) {
   const container = document.getElementById('chat-log');
@@ -44,6 +47,7 @@ function appendMessage(role, text) {
 /**
  * Shows or hides the three-dot typing indicator.
  * @param {boolean} show - Whether to display the indicator.
+ * @returns {void}
  */
 function showTypingIndicator(show) {
   const indicator = document.getElementById('typing-indicator');
@@ -58,6 +62,7 @@ function showTypingIndicator(show) {
  * Sends user prompt to the coach.
  * @param {string} text - User message text.
  * @param {Object} profile - User's profile data.
+ * @returns {Promise<void>}
  */
 async function sendMessageToCoach(text, profile) {
   appendMessage('user', text);
@@ -67,14 +72,14 @@ async function sendMessageToCoach(text, profile) {
   sessionStorage.setItem('cm_coach_message_count', messageCount.toString());
   updateRateLimitUI();
 
-  const input = document.getElementById('coach-textarea');
-  const sendBtn = document.getElementById('coach-send-btn');
-  if (input) {input.disabled = true;}
-  if (sendBtn) {sendBtn.disabled = true;}
+  const inputElement = document.getElementById('coach-textarea');
+  const sendButton = document.getElementById('coach-send-btn');
+  if (inputElement) {inputElement.disabled = true;}
+  if (sendButton) {sendButton.disabled = true;}
 
-  const footprint = profile?.footprint || { planetScore: 50, breakdown: { transport: 800, home: 800, food: 600 } };
+  const footprint = profile?.footprint || { ...DEFAULT_BASELINE_FOOTPRINT };
   const breakdown = footprint.breakdown || { transport: 0, home: 0, food: 0 };
-  const topEmission = Object.keys(breakdown).reduce((a, b) => breakdown[a] > breakdown[b] ? a : b, 'transport');
+  const topEmission = Object.keys(breakdown).reduce((highestKey, currentKey) => breakdown[highestKey] > breakdown[currentKey] ? highestKey : currentKey, 'transport');
 
   const userContext = {
     planetScore: footprint.planetScore ?? 50,
@@ -88,22 +93,23 @@ async function sendMessageToCoach(text, profile) {
     const response = await askCoach(text, userContext, history);
     showTypingIndicator(false);
     appendMessage('coach', response.reply);
-  } catch (error) {
+  } catch (connectionError) {
     showTypingIndicator(false);
     appendMessage('coach', 'Sorry, I failed to connect. Please try again.');
-    logger.error('AI Coach communication failed.', { message: error.message });
+    logger.error('AI Coach communication failed.', { message: connectionError.message });
   } finally {
-    if (input) {
-      input.disabled = false;
-      input.value = '';
-      input.focus();
+    if (inputElement) {
+      inputElement.disabled = false;
+      inputElement.value = '';
+      inputElement.focus();
     }
-    if (sendBtn) {sendBtn.disabled = false;}
+    if (sendButton) {sendButton.disabled = false;}
   }
 }
 
 /**
  * Reloads conversation logs from sessionStorage on page load.
+ * @returns {void}
  */
 function loadSessionHistory() {
   const saved = sessionStorage.getItem('cm_chat_history');
@@ -125,6 +131,7 @@ function loadSessionHistory() {
 
 /**
  * Initializes the AI Coach page module.
+ * @returns {void}
  */
 export function initCoachPage() {
   logger.info('Initializing AI Coach Page module.');

@@ -5,6 +5,7 @@
  */
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { logger } from 'firebase-functions/v2';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COACH_SYSTEM_PROMPT, FALLBACK_RESPONSES } from './coachPrompt.js';
@@ -151,8 +152,7 @@ export const geminiCoachHandler = onCall({
     const db = getFirestore();
     rateLimitPassed = await checkRateLimit(db, userId);
   } catch (error) {
-     
-    console.warn('Firestore rate limit check failed, bypassing.', error.message);
+    logger.warn('Firestore rate limit check failed, bypassing.', { message: error.message });
   }
   if (!rateLimitPassed) {
     return { error: 'RATE_LIMIT', message: 'You have used all 20 coach messages today.' };
@@ -166,8 +166,7 @@ export const geminiCoachHandler = onCall({
     const cleanReply = postProcessResponse(rawReply);
     return { reply: cleanReply, suggestedActions: extractActions(cleanReply) };
   } catch (error) {
-     
-    console.warn('Gemini call failed. Serving fallback.', error.message);
+    logger.warn('Gemini call failed. Serving fallback.', { message: error.message });
     const fallback = FALLBACK_RESPONSES[userContext.topEmission] || FALLBACK_RESPONSES.default;
     return { reply: fallback, suggestedActions: extractActions(fallback) };
   }

@@ -16,6 +16,7 @@ let activeCity = 'Delhi';
  * Generates and appends programmatically positioned SVG trees to the container.
  * @param {number} totalTrees - Total community trees.
  * @param {number} userTrees - Trees contributed by active user.
+ * @returns {void}
  */
 function renderForestSVG(totalTrees, userTrees) {
   const svg = document.getElementById('forest-svg');
@@ -53,6 +54,7 @@ function renderForestSVG(totalTrees, userTrees) {
 /**
  * Renders the top 10 city leaderboard.
  * @param {Array<Object>} list - Weekly leaderboard entries.
+ * @returns {void}
  */
 function renderLeaderboard(list) {
   const container = document.getElementById('leaderboard-list');
@@ -81,6 +83,7 @@ function renderLeaderboard(list) {
  * Loads city aggregations and triggers rendering.
  * @param {string} city - Target city name.
  * @param {string|null} userId - Current signed in user ID.
+ * @returns {Promise<void>}
  */
 async function loadCityData(city, userId) {
   const db = getFirestore();
@@ -135,6 +138,7 @@ async function loadCityData(city, userId) {
 
 /**
  * Setup interactive elements and load page.
+ * @returns {void}
  */
 export function initForestPage() {
   logger.info('Initializing Community Forest Page module.');

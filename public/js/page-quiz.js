@@ -6,7 +6,7 @@
 
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { saveUserProfile } from './firestore.js';
-import { logger } from './utils.js';
+import { logger, hashEmail, showNotification } from './utils.js';
 
 let currentStep = 1;
 const totalSteps = 4;
@@ -20,58 +20,51 @@ const defaultAnswers = {
   food: { dietType: 'vegetarian' }
 };
 
-/**
- * Hashes a string using SHA-256 via Web Crypto API.
- * @param {string} text - The input plain text.
- * @returns {Promise<string>} The hex-encoded hash.
- */
-async function hashEmail(text) {
-  if (!text) {return '';}
-  const msgBuffer = new TextEncoder().encode(text.trim().toLowerCase());
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 /**
- * Load cached answers from localStorage.
- * @returns {Object} Cached or default answers.
+ * Load cached answers from localStorage to prevent data loss.
+ * @returns {Object} Cached answers or default answers fallback.
  */
 function loadAnswers() {
   try {
-    const raw = localStorage.getItem(cacheKey);
-    return raw ? JSON.parse(raw) : { ...defaultAnswers };
-  } catch (_err) {
+    const rawCachedData = localStorage.getItem(cacheKey);
+    return rawCachedData ? JSON.parse(rawCachedData) : { ...defaultAnswers };
+  } catch (parseError) {
+    logger.warn('Failed to parse cached quiz answers.', { message: parseError.message });
     return { ...defaultAnswers };
   }
 }
 
 /**
- * Renders the active step visual state.
+ * Renders the active step visual state and updates the progress bar.
+ * Uses early returns and declarative DOM updates.
  */
 function renderStep() {
-  for (let s = 1; s <= totalSteps; s++) {
-    const el = document.getElementById(`quiz-step-${s}`);
-    if (el) {
-      const isCurrent = s === currentStep;
-      el.style.display = isCurrent ? 'flex' : 'none';
-      
-      // Disable inputs in hidden steps so they bypass HTML5 validation
-      const inputs = el.querySelectorAll('input, select');
-      inputs.forEach(input => {
-        input.disabled = !isCurrent;
-      });
+  for (let stepIndex = 1; stepIndex <= totalSteps; stepIndex++) {
+    const stepElement = document.getElementById(`quiz-step-${stepIndex}`);
+    if (!stepElement) {
+      continue;
     }
+    const isCurrent = stepIndex === currentStep;
+    stepElement.style.display = isCurrent ? 'flex' : 'none';
+    
+    // Disable inputs in hidden steps so they bypass HTML5 validation
+    const inputs = stepElement.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      input.disabled = !isCurrent;
+    });
   }
-  const prog = document.getElementById('quiz-progress-bar');
-  if (prog) {prog.value = (currentStep / totalSteps) * 100;}
-  const pct = document.getElementById('quiz-progress-percent');
-  if (pct) {pct.textContent = `${Math.round((currentStep / totalSteps) * 100)}%`;}
-  const prevBtn = document.getElementById('quiz-prev-btn');
-  if (prevBtn) {prevBtn.disabled = currentStep === 1;}
-  const nextBtnEl = document.getElementById('quiz-next-btn-text');
-  if (nextBtnEl) {nextBtnEl.textContent = currentStep === totalSteps ? 'Submit' : 'Next Step';}
+  const progressBarElement = document.getElementById('quiz-progress-bar');
+  if (progressBarElement) {progressBarElement.value = (currentStep / totalSteps) * 100;}
+  
+  const progressPercentageElement = document.getElementById('quiz-progress-percent');
+  if (progressPercentageElement) {progressPercentageElement.textContent = `${Math.round((currentStep / totalSteps) * 100)}%`;}
+  
+  const previousButtonElement = document.getElementById('quiz-prev-btn');
+  if (previousButtonElement) {previousButtonElement.disabled = currentStep === 1;}
+  
+  const nextButtonTextElement = document.getElementById('quiz-next-btn-text');
+  if (nextButtonTextElement) {nextButtonTextElement.textContent = currentStep === totalSteps ? 'Submit' : 'Next Step';}
 }
 
 /**
@@ -96,12 +89,13 @@ function captureInputs(answers) {
 /**
  * Handles submission of quiz answers to Firestore database.
  * @param {Object} answers - Complete answers payload.
+ * @returns {Promise<void>}
  */
 async function submitQuiz(answers) {
   const user = getAuth().currentUser;
   if (!user) {
     localStorage.setItem(cacheKey, JSON.stringify(answers));
-    alert('Please sign in to save your quiz results.');
+    showNotification('Please sign in to save your quiz results.');
     return;
   }
   const container = document.getElementById('quiz-container');
@@ -119,9 +113,9 @@ async function submitQuiz(answers) {
 
     localStorage.removeItem(cacheKey);
     window.location.href = 'dashboard';
-  } catch (_err) {
-    logger.error('Failed to submit quiz.', { message: _err.message });
-    alert(`Quiz save failed: ${  _err.message}`);
+  } catch (submissionError) {
+    logger.error('Failed to submit quiz.', { message: submissionError.message });
+    showNotification(`Quiz save failed: ${submissionError.message}`);
   }
 }
 

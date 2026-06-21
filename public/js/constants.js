@@ -100,3 +100,19 @@ export const ACTIONS = {
     rupeeSavedPerMonth: 200
   }
 };
+
+/**
+ * The fallback baseline footprint to use when user data is incomplete or missing.
+ * Prevents magic objects from littering UI controllers.
+ * @constant {Object}
+ */
+export const DEFAULT_BASELINE_FOOTPRINT = {
+  totalKgPerYear: 2200,
+  breakdown: {
+    transport: 800,
+    home: 800,
+    food: 600
+  },
+  planetScore: 50,
+  planetState: 'stressed'
+};

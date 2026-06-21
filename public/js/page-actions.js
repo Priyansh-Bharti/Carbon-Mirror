@@ -6,63 +6,56 @@
 
 import { listenToAuthState } from './auth.js';
 import { getUserProfile, saveUserProfile } from './firestore.js';
-import { calculateActionImpact } from './carbon-utils.js';
+import { aggregateProjectedSavings } from './carbon-utils.js';
 import { PlanetOrb } from './planet.js';
-import { logger } from './utils.js';
+import { logger, showNotification } from './utils.js';
+import { DEFAULT_BASELINE_FOOTPRINT } from './constants.js';
 
 let currentOrb = null;
 let projectedOrb = null;
 
 /**
  * Calculates and renders the projected footprint savings and planet score.
- * @param {Object} footprint - User baseline footprint.
- * @param {Array<string>} selected - IDs of selected actions.
+ * Relies on carbon-utils to handle the pure mathematical logic.
+ * @param {Object} baselineFootprint - User baseline footprint.
+ * @param {Array<string>} selectedActionIds - IDs of selected actions.
  */
-function updateProjectedImpact(footprint, selected) {
-  let totalSavedKg = 0;
-  let totalSavedRupees = 0;
-  const tempProfile = { ...footprint };
+function updateProjectedImpact(baselineFootprint, selectedActionIds) {
+  const impactResult = aggregateProjectedSavings(baselineFootprint, selectedActionIds);
+  const { totalSavedKgPerYear, totalSavedRupeesPerMonth, simulatedFootprint } = impactResult;
 
-  selected.forEach(actionId => {
-    const impact = calculateActionImpact(actionId, tempProfile);
-    if (!(impact instanceof Error)) {
-      totalSavedKg += impact.kgSavedPerMonth * 12.0;
-      totalSavedRupees += impact.rupeeSavedPerMonth;
-      tempProfile.totalKgPerYear = Math.max(0, tempProfile.totalKgPerYear - (impact.kgSavedPerMonth * 12.0));
-    }
-  });
-
-  const savedEl = document.getElementById('projected-reduction-total');
-  if (savedEl) {
-    savedEl.innerHTML = `${(totalSavedKg / 1000.0).toFixed(2)} <span class="label-caps" style="font-size: 14px;">Tons/Yr Saved</span>`;
+  const savedElement = document.getElementById('projected-reduction-total');
+  if (savedElement) {
+    savedElement.innerHTML = `${(totalSavedKgPerYear / 1000.0).toFixed(2)} <span class="label-caps" style="font-size: 14px;">Tons/Yr Saved</span>`;
   }
-  const rupeeEl = document.getElementById('projected-money-total');
-  if (rupeeEl) {
-    rupeeEl.textContent = `₹${totalSavedRupees}/Month Saved`;
+  const rupeeElement = document.getElementById('projected-money-total');
+  if (rupeeElement) {
+    rupeeElement.textContent = `₹${totalSavedRupeesPerMonth}/Month Saved`;
   }
 
   if (projectedOrb) {
-    projectedOrb.setState(selected.length > 0 ? tempProfile.planetScore : footprint.planetScore);
+    projectedOrb.setState(selectedActionIds.length > 0 ? simulatedFootprint.planetScore : baselineFootprint.planetScore);
   }
 }
 
 /**
  * Saves committed actions array to Firestore.
  * @param {string} userId - Auth user ID.
- * @param {Array<string>} selected - Committed actions.
+ * @param {Array<string>} selectedActionIds - Committed actions.
+ * @returns {Promise<void>}
  */
-async function saveCommitments(userId, selected) {
-  const saveBtn = document.getElementById('save-actions-btn');
-  if (saveBtn) {saveBtn.disabled = true;}
+async function saveCommitments(userId, selectedActionIds) {
+  const saveButton = document.getElementById('save-actions-btn');
+  if (saveButton) {saveButton.disabled = true;}
   try {
-    await saveUserProfile(userId, { committedActions: selected });
+    await saveUserProfile(userId, { committedActions: selectedActionIds });
     logger.info('Actions committed successfully to Firestore.');
-    alert('Commitments saved to your planet profile successfully!');
-  } catch (error) {
-    logger.error('Failed to save commitments.', { message: error.message });
-    alert(`Failed to save commitments: ${  error.message}`);
+    showNotification('Commitments saved to your planet profile successfully!');
+  } catch (saveError) {
+    logger.error('Failed to save commitments.', { message: saveError.message });
+    showNotification(`Failed to save commitments: ${saveError.message}`);
   } finally {
-    if (saveBtn) {saveBtn.disabled = false;}
+    if (saveButton) {saveButton.disabled = false;}
   }
 }
 
@@ -70,9 +63,10 @@ async function saveCommitments(userId, selected) {
  * Sets up action checkboxes event listeners.
  * @param {Object} profile - User profile.
  * @param {string} userId - User's authenticated ID.
+ * @returns {void}
  */
 function setupListeners(profile, userId) {
-  const footprint = profile.footprint || { totalKgPerYear: 2200, planetScore: 50 };
+  const footprint = profile.footprint || { ...DEFAULT_BASELINE_FOOTPRINT };
   const checkboxes = document.querySelectorAll('#actions-checklist-section input[type="checkbox"]');
   
   const getSelected = () => Array.from(checkboxes)
@@ -107,6 +101,7 @@ function setupListeners(profile, userId) {
 /**
  * Initializes visual canvas orbs for comparison.
  * @param {Object} footprint - User baseline footprint.
+ * @returns {void}
  */
 function initializeComparisonOrbs(footprint) {
   const curCanvas = document.getElementById('planet-current');
@@ -127,6 +122,7 @@ function initializeComparisonOrbs(footprint) {
 
 /**
  * Initializes the Action Lab page module.
+ * @returns {void}
  */
 export function initActionsPage() {
   logger.info('Initializing Actions Page module.');
@@ -138,11 +134,11 @@ export function initActionsPage() {
     try {
       const profile = await getUserProfile(user.uid);
       if (!profile || !profile.quizAnswers) {
-        alert('Please complete your baseline quiz to unlock the Action Lab!');
+        showNotification('Please complete your baseline quiz to unlock the Action Lab!');
         window.location.href = 'quiz';
         return;
       }
-      const footprint = profile.footprint || { totalKgPerYear: 2200, planetScore: 50 };
+      const footprint = profile.footprint || { ...DEFAULT_BASELINE_FOOTPRINT };
       initializeComparisonOrbs(footprint);
       setupListeners(profile, user.uid);
     } catch (err) {

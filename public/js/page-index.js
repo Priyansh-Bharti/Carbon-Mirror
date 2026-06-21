@@ -13,6 +13,7 @@ import { logger } from './utils.js';
  * @param {number} target - The final numeric value.
  * @param {number} duration - Animation duration in ms.
  * @param {string} suffix - Suffix to append (e.g. 'T', '%').
+ * @returns {void}
  */
 function animateValue(el, target, duration, suffix = '') {
   const start = 0;
@@ -39,6 +40,7 @@ function animateValue(el, target, duration, suffix = '') {
 
 /**
  * Sets up Scroll triggers for statistics counters.
+ * @returns {void}
  */
 export function initLandingStats() {
   const cards = document.querySelectorAll('.glass-card .metric-lg');
