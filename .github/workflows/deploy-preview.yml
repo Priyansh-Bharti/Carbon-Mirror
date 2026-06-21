@@ -1,0 +1,42 @@
+name: Deploy Preview Channel
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_preview:
+    name: Deploy to Firebase Preview Channel
+    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Inject Preview Secrets into config.js
+        run: |
+          sed -i "s/__FIREBASE_API_KEY__/${{ secrets.FIREBASE_API_KEY }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_AUTH_DOMAIN__/${{ secrets.FIREBASE_AUTH_DOMAIN }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_PROJECT_ID__/${{ secrets.FIREBASE_PROJECT_ID }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_STORAGE_BUCKET__/${{ secrets.FIREBASE_STORAGE_BUCKET }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_MESSAGING_SENDER_ID__/${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_APP_ID__/${{ secrets.FIREBASE_APP_ID }}/g" public/js/config.js
+          sed -i "s/__FIREBASE_MEASUREMENT_ID__/${{ secrets.FIREBASE_MEASUREMENT_ID }}/g" public/js/config.js
+          sed -i "s/__MAPS_API_KEY__/${{ secrets.MAPS_API_KEY }}/g" public/js/config.js
+
+      - name: Deploy to Firebase Hosting Preview
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
+          channelId: 'pr-${{ github.event.number }}'
