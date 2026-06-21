@@ -27,7 +27,7 @@ jobs:
         run: npm run test
 
       - name: Validate Firebase Configuration
-        run: npx firebase-tools deploy --only firestore:rules --dry-run
+        run: npx --yes firebase-tools deploy --only firestore:rules --dry-run
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 

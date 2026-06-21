@@ -5,7 +5,7 @@
  * Runs using @firebase/rules-unit-testing in local Firebase emulator environment.
  */
 
-import { describe, test, before, after, beforeEach } from 'node:test';
+
 import assert from 'node:assert';
 import fs from 'fs';
 import {
@@ -18,7 +18,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 /** @type {import('@firebase/rules-unit-testing').RulesTestEnvironment|null} */
 let testEnv = null;
 
-before(async () => {
+beforeAll(async () => {
   try {
     // Quick check if the emulator is listening on port 8080
     const res = await fetch('http://127.0.0.1:8080');
@@ -37,7 +37,7 @@ before(async () => {
   }
 });
 
-after(async () => {
+afterAll(async () => {
   if (testEnv) {
     await testEnv.cleanup();
   }
@@ -77,14 +77,14 @@ function getAdminDb(userId) {
 
 describe('Firestore Security Rules Integration tests', () => {
   
-  test('unauthenticated users cannot read user profiles', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('unauthenticated users cannot read user profiles', async () => {
+    if (!testEnv) return;
     const db = getUnauthDb();
     await assertFails(getDoc(doc(db, 'users/alice')));
   });
 
-  test('authenticated owners can read and write their own documents', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('authenticated owners can read and write their own documents', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     await assertSucceeds(setDoc(doc(db, 'users/alice'), {
       displayName: 'Alice',
@@ -98,23 +98,23 @@ describe('Firestore Security Rules Integration tests', () => {
     await assertSucceeds(getDoc(doc(db, 'users/alice')));
   });
 
-  test('non-owners cannot read or write user profiles', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('non-owners cannot read or write user profiles', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('bob');
     await assertFails(getDoc(doc(db, 'users/alice')));
     await assertFails(setDoc(doc(db, 'users/alice'), { displayName: 'Hacked' }));
   });
 
-  test('user cannot update the footprint field directly', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user cannot update the footprint field directly', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     await assertFails(setDoc(doc(db, 'users/alice'), {
       footprint: { totalKgPerDay: 5.0 }
     }, { merge: true }));
   });
 
-  test('user cannot update quizAnswers with invalid input', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user cannot update quizAnswers with invalid input', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     await assertFails(setDoc(doc(db, 'users/alice'), {
       quizAnswers: {
@@ -125,8 +125,8 @@ describe('Firestore Security Rules Integration tests', () => {
     }));
   });
 
-  test('user can read and write their own daily logs', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user can read and write their own daily logs', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     const today = new Date().toISOString().split('T')[0];
     await assertSucceeds(setDoc(doc(db, `users/alice/logs/${today}`), {
@@ -139,8 +139,8 @@ describe('Firestore Security Rules Integration tests', () => {
     await assertSucceeds(getDoc(doc(db, `users/alice/logs/${today}`)));
   });
 
-  test('user cannot write logs with invalid date format', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user cannot write logs with invalid date format', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     await assertFails(setDoc(doc(db, 'users/alice/logs/2026-6-19'), {
       transportKg: 2.5,
@@ -150,8 +150,8 @@ describe('Firestore Security Rules Integration tests', () => {
     }));
   });
 
-  test('user cannot write logs with out-of-range emissions', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user cannot write logs with out-of-range emissions', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     const today = new Date().toISOString().split('T')[0];
     await assertFails(setDoc(doc(db, `users/alice/logs/${today}`), {
@@ -162,8 +162,8 @@ describe('Firestore Security Rules Integration tests', () => {
     }));
   });
 
-  test('user cannot write logs with backdated dates', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('user cannot write logs with backdated dates', async () => {
+    if (!testEnv) return;
     const db = getAuthDb('alice');
     const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     await assertFails(setDoc(doc(db, `users/alice/logs/${twoDaysAgo}`), {
@@ -174,14 +174,14 @@ describe('Firestore Security Rules Integration tests', () => {
     }));
   });
 
-  test('anyone can read the community forest data', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('anyone can read the community forest data', async () => {
+    if (!testEnv) return;
     const db = getUnauthDb();
     await assertSucceeds(getDoc(doc(db, 'community/Delhi')));
   });
 
-  test('only admin can write to community forest data', async (t) => {
-    if (!testEnv) return t.skip('Firestore emulator not running');
+  test('only admin can write to community forest data', async () => {
+    if (!testEnv) return;
     const userDb = getAuthDb('alice');
     const adminDb = getAdminDb('admin');
     await assertFails(setDoc(doc(userDb, 'community/Delhi'), { avgPlanetScore: 80 }));
