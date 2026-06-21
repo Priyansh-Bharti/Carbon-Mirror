@@ -2,77 +2,128 @@
 
 ![Carbon Mirror Banner](public/assets/carbon_mirror_icon.png)
 
-**Carbon Mirror** is an interactive, gamified web application built to help users calculate, track, and significantly reduce their carbon footprint. Powered by an advanced serverless architecture and intelligent AI coaching, Carbon Mirror transforms climate anxiety into actionable, measurable steps toward sustainability.
+**Carbon Mirror** is a mathematically rigorous, gamified web application designed to help users calculate, track, and significantly reduce their carbon footprint. Utilizing an advanced serverless architecture and intelligent AI coaching, Carbon Mirror translates climate awareness into actionable, measurable steps toward sustainability.
 
 ---
 
 ## 🎯 Problem Statement Alignment
-*This project accurately targets the root challenge of climate change inaction by addressing core user needs and objectives.*
+*Addressing key user needs and objectives through structured, data-driven sustainability features.*
 
 While many individuals want to reduce their environmental impact, they often lack the personalized data and guidance needed to do so effectively. Carbon Mirror bridges this gap by providing:
 - **Personalized Insights:** Instead of generic advice, users receive bespoke recommendations based on their actual lifestyle data (travel, diet, energy usage).
 - **Gamified Motivation:** By introducing a "Planet Score" and tracking real-time impact, users are incentivized to continuously improve.
-- **Community Impact:** The "Community Forest" visualizes collective progress, showing users that their individual actions contribute to a much larger, tangible goal.
-- **Why Use It?** It is highly beneficial because it demystifies carbon footprints, making sustainability accessible, trackable, and socially engaging.
-
----
-
-## 🧠 The Thought Process & Design Philosophy
-Our goal was to create an application that is not only mathematically rigorous but also visually stunning and emotionally engaging.
-1. **Understand First:** We started by compiling scientifically accurate carbon emission factors (IPCC, EPA).
-2. **Visualize:** We built a dynamic WebGL "Planet Canvas" that visually degrades or heals based on the user's footprint, creating an immediate emotional connection.
-3. **Action-Oriented AI:** Rather than just telling users they are emitting too much, we integrated Google Gemini to act as an empathetic, knowledgeable "Carbon Coach" that suggests realistic, actionable lifestyle changes.
-4. **Frictionless Experience:** We opted for a lightweight, client-side first architecture with Firebase to ensure instantaneous feedback without heavy server-side rendering delays.
-
----
-
-## ⚡ Google Cloud Integration
-Carbon Mirror is built entirely on a serverless Google Cloud stack for maximum scalability, security, and zero-maintenance overhead:
-
-- **Google Gemini Pro 1.5:** Powers the "AI Carbon Coach." We securely proxy requests through Firebase Cloud Functions to interact with Vertex AI/AI Studio, providing users with hyper-personalized sustainability advice based on their quiz data.
-- **Firebase Authentication:** Provides seamless, secure onboarding (Anonymous + Email/Password) without the hassle of managing credential databases.
-- **Cloud Firestore:** A NoSQL real-time database that securely syncs user scores, commitments, and the global "Community Forest" state across all connected clients instantly.
-- **Firebase Cloud Functions (Node.js):** Acts as our secure backend layer, aggregating community data, validating user inputs, and keeping API keys safely hidden from the client.
-- **Google Maps API:** Used to calculate precise commute distances and geocode locations for accurate transportation emission metrics.
-- **Firebase Hosting:** Delivers the static assets via a global CDN with built-in SSL and CI/CD integration via GitHub Actions.
+- **Community Impact:** The "Community Forest" visualizes collective progress, demonstrating that individual actions contribute to a much larger, tangible goal.
+- **Actionable Outcomes:** Decoupled calculation modules and AI coaching enable users to commit to specific actions and view their simulated future footprints immediately.
 
 ---
 
 ## 🏆 Hackathon Evaluation Criteria
 
-### 1. Code Quality
-*How clean, readable, and well-structured the submitted code is.*
-- **Strict Linting & Formatting:** Enforced via a modern ESLint Flat Config (`eslint.config.js`) and Prettier. The codebase maintains a strict **zero-error, zero-warning** standard (excluding intentional UI alerts).
-- **Modular Architecture:** Client-side code is divided into highly cohesive, loosely coupled ES6 Modules. Logic (e.g., `carbon.js`), state management, and UI rendering are strictly separated.
-- **Documentation:** Comprehensive JSDoc comments document all parameters, return types, and potential exceptions for every function, making the codebase self-explanatory for new contributors.
+| Criterion | Technical Implementation | Verification Mechanism |
+|---|---|---|
+| 📐 **Code Quality** | - **Decoupled ES6 Architecture**: Complete separation of business calculations (`carbon.js`) from UI/DOM controllers (`page-*.js`).<br>- **Static Analysis Compliance**: Modern ESLint Flat Config (`eslint.config.js`) enforces a strict zero-error, zero-warning standard.<br>- **Strict Typings via JSDoc**: Comprehensive comments specifying `@param`, `@returns`, and `@throws` for every function.<br>- **Zero Magic Numbers**: All physical coefficients and scale factors are centralized in `constants.js`. | - Automated ESLint validation (`npm run lint`).<br>- Dependency injection and separation audits. |
+| 🔒 **Security** | - **Secure API Gateway Proxying**: Gemini / Vertex AI keys are stored server-side in Cloud Functions, eliminating client-side exposure.<br>- **App Check & Authentication**: Enforces JWT verification and client signature validation on all endpoints.<br>- **Sanitization via DOMPurify/Context-Aware Escaping**: Deep escaping of dynamic user and AI content (`sanitizeHTML`).<br>- **Granular Firestore Security Rules**: Isolated database queries with strict owner-only write permissions. | - Gitleaks scans to prevent credential leaks.<br>- Firestore Security Rules test suite (`tests/integration/firestore.test.js`). |
+| ⚡ **Efficiency** | - **Client-Side Heavy Lifting**: Complex footprint math is computed client-side to minimize network hops and transit latency.<br>- **High-Performance Rendering**: The planet canvas runs WebGL loops via `requestAnimationFrame`, pausing automatically when off-screen.<br>- **Debounced Real-Time Syncing**: Firestore writes are debounced by 500ms to throttle database read/write counts.<br>- **No CSS Pipelines**: Native CSS Variables/Tokens used to eliminate processing overhead. | - Chrome DevTools Performance Profiling.<br>- Low-latency real-time state synchronization. |
+| 🧪 **Testing** | - **100% Core Coverage**: Pure emission functions and formatting utilities are verified by Jest unit tests.<br>- **End-to-End Testing**: Playwright runs 52 E2E tests checking the entire user flow across multiple viewports. | - Unit testing suite (`npm run test`).<br>- Playwright cross-browser verification. |
+| ♿ **Accessibility** | - **Axe-Core WCAG 2.2 AA Compliance**: Automated accessibility assertions integrated directly into the test suite.<br>- **Screen Reader Support**: Active ARIA roles, descriptive labels on WebGL canvases, and dynamic live updates via `aria-live` polite regions.<br>- **Fluid Layouts**: Full responsive layout support without horizontal scrolling down to 375px. | - Automated `axe-core` accessibility scans.<br>- Screen reader and keyboard navigation walkthroughs. |
 
-### 2. Security
-*Whether the code follows safe practices and avoids common vulnerabilities.*
-- **Zero Hardcoded Secrets:** All API keys (Firebase, Google Maps, Gemini) are injected via CI/CD pipelines or `.env` files. We utilize `.gitleaks.toml` and GitHub Actions to actively scan for and prevent credential leaks.
-- **Backend Proxying:** The Gemini API is never called directly from the browser. It is securely proxied through Firebase Cloud Functions, hiding the API key and validating user tokens.
-- **Firestore Security Rules:** Read/write access is strictly governed. Users can only modify their own data, and aggregate statistics are protected from tampering.
-- **XSS Prevention:** All user-generated content and AI responses are heavily sanitized before DOM insertion using a robust HTML sanitizer.
+---
 
-### 3. Efficiency
-*How well the code utilizes resources like time and memory.*
-- **Client-Side Heavy Lifting:** Complex mathematical modeling for carbon footprints is processed entirely on the client side, drastically reducing server costs and latency.
-- **Optimized Assets:** The application uses Vanilla HTML5 and CSS3 (via CSS Variables/Tokens) without the bloat of heavy frontend frameworks.
-- **Debounced Writes:** Firestore writes are batched and debounced to minimize database reads/writes and reduce Cloud execution time.
-- **Animation Performance:** The WebGL planet canvas uses `requestAnimationFrame` and pauses rendering when not in the viewport or when the tab is inactive, preserving device battery and memory.
+## 🧠 Architecture & Technical Design
 
-### 4. Testing
-*How easily the code can be tested, validated, and maintained over time.*
-- **100% Mathematical Coverage:** All carbon calculation formulas in `carbon.js` are fully covered by Jest unit tests.
-- **End-to-End (E2E) Testing:** We utilize Playwright to run 52 rigorous E2E tests across `chromium` and `mobile-chrome`.
-- **User Journey Validation:** Automated scripts verify that the core user flows (Quiz -> Dashboard -> Coach -> Actions) work flawlessly without regressions.
-- **Continuous Integration (CI):** GitHub actions automatically run unit tests, security scans, and linting on every push to the `master` branch.
+### Decoupled ES6 Architecture & Code Quality
+The frontend is constructed using native ES Modules to enforce strict **Separation of Concerns (SoC)**. The business logic (`public/js/carbon.js`) is stateless, side-effect-free, and contains the EPA and IPCC baseline greenhouse gas coefficients. 
 
-### 5. Accessibility
-*How usable the solution is for diverse users and environments.*
-- **Perfect Axe-Core Score:** Our E2E pipeline integrates `axe-core`, ensuring the application meets strict WCAG 2.2 AA standards.
-- **Keyboard Navigation:** A hidden "Skip to Main Content" link is the first focusable element. All interactive elements (buttons, forms, navigation) are fully keyboard-operable.
-- **Screen Reader Support:** Complex visual elements like the WebGL Planet Canvas include `role="img"` and descriptive `aria-label`s. Live regions (`aria-live="polite"`) announce dynamic score changes to visually impaired users.
-- **Responsive Design:** Fluid layouts guarantee zero horizontal scrolling from mobile devices (375px) all the way up to ultra-wide desktop monitors.
+UI controllers (`public/js/page-*.js`) manage only user interactions and DOM rendering, delegating calculations to the core engine. Standard static analysis controls (`eslint.config.js`) prevent code degradation by restricting anti-patterns, eliminating legacy configuration conflicts, and enforcing `const`/`let` standardizations.
+
+### Google Cloud Integration & Secure Gateway Proxy
+The application coordinates multiple serverless Google Cloud services to deliver an enterprise-grade experience:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Browser
+    participant Client as Client Application (JS)
+    participant CF as Cloud Function (geminiCoachHandler)
+    participant Firestore as Firestore DB
+    participant Gemini as Vertex AI / Gemini API
+
+    User->>Client: Inputs message (Coach Chat)
+    Client->>Client: Sanitizes input & forms payload
+    Client->>CF: Calls geminiCoach HTTPS endpoint (Auth JWT + App Check)
+    activate CF
+    CF->>CF: Validates App Check token & Auth UID
+    CF->>Firestore: Checks rate limit transactionally (20/day)
+    alt Limit Exceeded
+        CF-->>Client: Returns Rate Limit Error
+    else Under Limit
+        CF->>Firestore: Fetches User Profile & Quiz Context
+        Firestore-->>CF: Returns context object
+        CF->>CF: Embeds context into system prompt
+        CF->>Gemini: Sends prompt with system instructions (Timeout protection)
+        activate Gemini
+        Gemini-->>CF: Returns raw response text
+        deactivate Gemini
+        CF->>CF: Post-processes response (strips URLs, sanitizes output)
+        CF->>CF: Extracts actionable commit suggestions
+        CF-->>Client: Returns sanitized message & suggested action IDs
+    end
+    deactivate CF
+    Client->>Client: Escapes message (sanitizeHTML) & updates DOM
+    Client->>User: Displays response & action recommendations
+```
+
+> [!IMPORTANT]
+> **API Gateway Proxying & Key Separation**
+> Client applications never interact directly with the Vertex AI / Gemini API. The request is proxied through Firebase Cloud Functions (`functions/geminiProxy.js`), protecting downstream resources from key extraction.
+
+- **App Check Protection:** Restricts API endpoint access to authorized application clients, preventing external script scraping and bot requests.
+- **Transactional Rate Limiting:** Utilizes a Firestore transaction to track and limit users to 20 AI queries per day, protecting cloud budgets.
+- **Context-Aware Prompts:** Inject user profile metrics (e.g. active commitments, carbon quiz stats) to provide precise, highly contextual recommendations.
+- **Defensive Post-Processing:** Strips links, markdown formatting, and potential prompt leakage constructs prior to returning response payloads.
+- **Fallback Operations:** Returns pre-configured baseline recommendations if the AI model times out or encounters errors, guaranteeing high availability.
+
+---
+
+## 📂 Repository Directory Map
+
+```
+.
+├── .github/workflows/         # CI/CD deployment pipelines (GitHub Actions)
+├── docs/                      # Scientific baseline & system design specs
+│   ├── ARCHITECTURE.md        # Technical architecture & subsystem flow
+│   └── RESEARCH.md            # Empirical carbon factors (EPA/IPCC)
+├── functions/                 # Secure Firebase Cloud Functions (Node.js v2)
+│   ├── index.js               # Main Cloud Functions endpoint registration
+│   ├── geminiProxy.js         # Secure Vertex AI/Gemini Pro proxy with validation
+│   ├── coachPrompt.js         # Empathetic AI system instruction configuration
+│   ├── onQuizComplete.js      # Quiz processor updating user scores
+│   └── updateCommunityForest.js # Shared forest aggregator database trigger
+├── public/                    # Client application static files
+│   ├── css/                   # CSS3 styling variables and layout styles
+│   │   ├── tokens.css         # Harmonious visual design system variables
+│   │   └── components.css     # Premium UI element styling
+│   ├── js/                    # Decoupled ES6 modules structure
+│   │   ├── app.js             # Client lifecycle & Auth orchestrator
+│   │   ├── auth.js            # Firebase Authentication wrapper
+│   │   ├── carbon.js          # Pure, mathematically rigorous emission formulas
+│   │   ├── carbon-utils.js    # Data formatting and aggregation helpers
+│   │   ├── constants.js       # Centralized physical coefficients & scale variables
+│   │   ├── firestore.js       # Firestore real-time database sync wrapper
+│   │   ├── gemini.js          # Secure proxy client connection handler
+│   │   ├── maps.js            # Distance calculation using Google Maps API
+│   │   ├── planet.js          # WebGL Planet Canvas state controller
+│   │   ├── planet-draw.js     # WebGL rendering engine for the ecosystem
+│   │   ├── utils.js           # Sanitization & screen reader live utilities
+│   │   └── page-*.js          # Isolated page controllers (Separation of Concerns)
+│   └── *.html                 # Semantic HTML5 page entry points
+├── tests/                     # Automated test suites
+│   ├── e2e/                   # Playwright end-to-end user flows
+│   ├── integration/           # Firestore security rule integration tests
+│   └── unit/                  # Jest mathematical & format verification tests
+├── eslint.config.js           # Flat config static analysis rules (0 errors/warnings)
+└── firestore.rules            # Granular Firestore security access rules
+```
 
 ---
 
@@ -86,8 +137,8 @@ Carbon Mirror is built entirely on a serverless Google Cloud stack for maximum s
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/carbon-mirror.git
-   cd carbon-mirror
+   git clone https://github.com/Priyansh-Bharti/Carbon-Mirror.git
+   cd Carbon-Mirror
    ```
 
 2. **Install dependencies:**
@@ -101,11 +152,11 @@ Carbon Mirror is built entirely on a serverless Google Cloud stack for maximum s
    - Fill in your API keys in the `.env` file. Do **not** commit this file.
 
 4. **Run Locally:**
-   Use the Firebase Local Emulator Suite to run the app entirely locally:
+   Use the Firebase Local Emulator Suite to run the app entirely locally (functions, hosting, firestore):
    ```bash
    npm run start
    ```
-   Access the app at `http://localhost:5000`.
+   Access the local client application at `http://localhost:5000`.
 
 ---
 
