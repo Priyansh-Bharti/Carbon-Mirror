@@ -29,7 +29,7 @@ function updateRateLimitUI() {
  */
 function appendMessage(role, text) {
   const container = document.getElementById('chat-log');
-  if (!container) return;
+  if (!container) {return;}
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `chat-message ${role === 'user' ? 'msg-user' : 'msg-coach'} fade-rise`;
@@ -50,7 +50,7 @@ function showTypingIndicator(show) {
   if (indicator) {
     indicator.style.display = show ? 'flex' : 'none';
     const log = document.getElementById('chat-log');
-    if (log && show) log.scrollTop = log.scrollHeight;
+    if (log && show) {log.scrollTop = log.scrollHeight;}
   }
 }
 
@@ -69,8 +69,8 @@ async function sendMessageToCoach(text, profile) {
 
   const input = document.getElementById('coach-textarea');
   const sendBtn = document.getElementById('coach-send-btn');
-  if (input) input.disabled = true;
-  if (sendBtn) sendBtn.disabled = true;
+  if (input) {input.disabled = true;}
+  if (sendBtn) {sendBtn.disabled = true;}
 
   const footprint = profile?.footprint || { planetScore: 50, breakdown: { transport: 800, home: 800, food: 600 } };
   const breakdown = footprint.breakdown || { transport: 0, home: 0, food: 0 };
@@ -98,7 +98,7 @@ async function sendMessageToCoach(text, profile) {
       input.value = '';
       input.focus();
     }
-    if (sendBtn) sendBtn.disabled = false;
+    if (sendBtn) {sendBtn.disabled = false;}
   }
 }
 
@@ -119,7 +119,7 @@ function loadSessionHistory() {
       }
     });
     const log = document.getElementById('chat-log');
-    if (log) log.scrollTop = log.scrollHeight;
+    if (log) {log.scrollTop = log.scrollHeight;}
   }
 }
 

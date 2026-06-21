@@ -32,11 +32,11 @@ function log(level, message, meta = {}) {
   const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : '';
   const output = `[${timestamp}] [${level}] CarbonMirror: ${message} ${metaStr}`;
 
-  // eslint-disable-next-line no-console
+   
   if (level === LOG_LEVELS.ERROR) {
-    console.error(output); // eslint-disable-line no-console
+    console.error(output);  
   } else if (level === LOG_LEVELS.WARN) {
-    console.warn(output); // eslint-disable-line no-console
+    console.warn(output);  
   } else {
     console.info(output); // eslint-disable-line no-console
   }
@@ -112,7 +112,7 @@ export function daysSinceDate(dateStr) {
     return -1;
   }
   const past = new Date(dateStr);
-  if (isNaN(past.getTime())) return -1;
+  if (isNaN(past.getTime())) {return -1;}
   const msPerDay = 24 * 60 * 60 * 1000;
   return Math.floor((Date.now() - past.getTime()) / msPerDay);
 }
@@ -128,7 +128,7 @@ export function formatDisplayDate(dateStr) {
     return 'Invalid date';
   }
   const d = new Date(`${dateStr}T00:00:00`);
-  if (isNaN(d.getTime())) return 'Invalid date';
+  if (isNaN(d.getTime())) {return 'Invalid date';}
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
@@ -158,7 +158,7 @@ export function debounce(fn, waitMs) {
  */
 export function announceToScreenReader(message) {
   const region = document.getElementById('planet-score-announcement');
-  if (!region) return;
+  if (!region) {return;}
   region.textContent = '';
   setTimeout(() => { region.textContent = message; }, 50);
 }

@@ -49,10 +49,10 @@ export function calculateTransportEmissions(transportData) {
  */
 function getCookingEmissions(fuel) {
   const f = fuel.toLowerCase();
-  if (f === 'lpg') return 14.2 * ENERGY_FACTORS.lpg_kg;
-  if (f === 'gas') return 15.0 * ENERGY_FACTORS.natural_gas_scm;
-  if (f === 'firewood') return 150.0 * ENERGY_FACTORS.firewood_kg;
-  if (f === 'electric') return 60.0 * ENERGY_FACTORS.electricity_kwh;
+  if (f === 'lpg') {return 14.2 * ENERGY_FACTORS.lpg_kg;}
+  if (f === 'gas') {return 15.0 * ENERGY_FACTORS.natural_gas_scm;}
+  if (f === 'firewood') {return 150.0 * ENERGY_FACTORS.firewood_kg;}
+  if (f === 'electric') {return 60.0 * ENERGY_FACTORS.electricity_kwh;}
   return null;
 }
 
@@ -146,11 +146,11 @@ function _computeTotalFootprint(userAnswers) {
     transportData.flightsPerYear = userAnswers.flights.flightsPerYear;
   }
   const transportDaily = calculateTransportEmissions(transportData);
-  if (transportDaily instanceof Error) return transportDaily;
+  if (transportDaily instanceof Error) {return transportDaily;}
   const homeDaily = calculateHomeEmissions(userAnswers.home);
-  if (homeDaily instanceof Error) return homeDaily;
+  if (homeDaily instanceof Error) {return homeDaily;}
   const foodDaily = calculateFoodEmissions(userAnswers.food);
-  if (foodDaily instanceof Error) return foodDaily;
+  if (foodDaily instanceof Error) {return foodDaily;}
 
   const dailyTotal = transportDaily + homeDaily + foodDaily;
   const annualTotal = dailyTotal * 365.0;

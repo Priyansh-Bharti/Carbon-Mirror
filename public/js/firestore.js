@@ -64,14 +64,14 @@ export async function getUserProfile(userId) {
   try {
     const docRef = doc(db, DB_COLLECTIONS.USERS, userId);
     const snap = await getDoc(docRef);
-    if (snap.exists()) return snap.data();
-  } catch (error) {
+    if (snap.exists()) {return snap.data();}
+  } catch (_error) {
     logger.warn('Firebase read failed. Loading from offline localStorage cache.', { userId });
   }
   
   try {
     const cached = localStorage.getItem(`cm_profile_${userId}`);
-    if (cached) return JSON.parse(cached);
+    if (cached) {return JSON.parse(cached);}
   } catch (_e) {
     logger.warn('Failed to parse localStorage cache, returning null.', { userId });
   }

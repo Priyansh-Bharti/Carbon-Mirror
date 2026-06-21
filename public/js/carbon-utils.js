@@ -37,9 +37,9 @@ export function getPlanetState(score) {
   if (typeof score !== 'number' || isNaN(score)) {
     return 'critical';
   }
-  if (score >= 75) return 'thriving';
-  if (score >= 50) return 'stressed';
-  if (score >= 30) return 'struggling';
+  if (score >= 75) {return 'thriving';}
+  if (score >= 50) {return 'stressed';}
+  if (score >= 30) {return 'struggling';}
   return 'critical';
 }
 

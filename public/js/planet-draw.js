@@ -78,7 +78,7 @@ export function drawGlow(ctx, x, y, r, state) {
  * @param {string} state - The planet state.
  */
 export function drawLandmasses(ctx, x, y, r, angle, state) {
-  if (state === SCORE_STATES.CRITICAL) return;
+  if (state === SCORE_STATES.CRITICAL) {return;}
   ctx.save();
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -137,8 +137,8 @@ export function drawClouds(ctx, x, y, r, angle, state) {
   ctx.clip();
 
   let opacity = 0.2;
-  if (state === SCORE_STATES.STRUGGLING) opacity = 0.6;
-  if (state === SCORE_STATES.CRITICAL) opacity = 0.85;
+  if (state === SCORE_STATES.STRUGGLING) {opacity = 0.6;}
+  if (state === SCORE_STATES.CRITICAL) {opacity = 0.85;}
 
   ctx.fillStyle = `rgba(240, 244, 255, ${opacity})`;
   const offset = (angle * r * 0.8) % (r * 2);

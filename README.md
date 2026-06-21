@@ -25,7 +25,7 @@ Carbon Mirror is built entirely on a serverless Google Cloud stack for maximum s
 - **Maps**: Google Maps API (Distance matrix and geocoding)
 - **Hosting & CI/CD**: Firebase Hosting deployed via GitHub Actions
 
-For a detailed technical breakdown, please see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+For a detailed technical breakdown, please see [ARCHITECTURE.md](docs/ARCHITECTURE.md) and [RESEARCH.md](docs/RESEARCH.md) for system design and carbon metric baselines.
 
 ## Quick Start (Local Development)
 
@@ -41,11 +41,10 @@ For a detailed technical breakdown, please see [ARCHITECTURE.md](docs/ARCHITECTU
    cd carbon-mirror
    ```
 
-2. **Install dependencies (for Cloud Functions):**
+2. **Install dependencies:**
    ```bash
-   cd functions
    npm install
-   cd ..
+   cd functions && npm install && cd ..
    ```
 
 3. **Configure Environment Variables:**
@@ -61,9 +60,9 @@ For a detailed technical breakdown, please see [ARCHITECTURE.md](docs/ARCHITECTU
 
 ## Testing
 
-Carbon Mirror uses Jest for unit testing mathematical logic and utility functions.
+Carbon Mirror uses Jest for unit testing mathematical logic and utility functions, and Playwright for End-to-End accessibility and user-journey validation.
 ```bash
-npm run test
+npm run test:all
 ```
 
 ## Security

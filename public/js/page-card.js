@@ -118,7 +118,7 @@ function downloadCard(canvas, name) {
  */
 function shareCard(canvas) {
   canvas.toBlob(async (blob) => {
-    if (!blob) return;
+    if (!blob) {return;}
     const file = new File([blob], 'carbon_mirror_card.png', { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
@@ -149,7 +149,7 @@ export function initCardPage() {
     }
 
     const profile = await getUserProfile(user.uid);
-    if (!profile) return;
+    if (!profile) {return;}
 
     const canvas = document.getElementById('share-canvas');
     if (canvas instanceof HTMLCanvasElement) {

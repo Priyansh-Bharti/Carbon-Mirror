@@ -49,6 +49,27 @@ export class PlanetOrb {
     } else {
       this.state = SCORE_STATES.CRITICAL;
     }
+    this._syncAriaLabel();
+  }
+
+  /**
+   * Syncs the canvas aria-label with the current score and state.
+   * Called after every setState() invocation.
+   * @private
+   */
+  _syncAriaLabel() {
+    if (!this.canvas) { return; }
+    const stateDescriptions = {
+      [SCORE_STATES.THRIVING]: 'Your planet is healthy and thriving. Keep it up!',
+      [SCORE_STATES.STRESSED]: 'Your planet is under stress. Small actions can help.',
+      [SCORE_STATES.STRUGGLING]: 'Your planet is struggling. Consider the Action Lab.',
+      [SCORE_STATES.CRITICAL]: 'Your planet is in critical condition. Urgent action needed.',
+    };
+    const desc = stateDescriptions[this.state] ?? '';
+    this.canvas.setAttribute(
+      'aria-label',
+      `Your planet health score: ${this.score} out of 100. Planet state: ${this.state}. ${desc}`
+    );
   }
 
   /**
@@ -56,10 +77,10 @@ export class PlanetOrb {
    * Respects prefers-reduced-motion for accessibility.
    */
   startAnimation() {
-    if (this.animationFrameId) return;
+    if (this.animationFrameId) {return;}
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const loop = (timestamp) => {
-      if (!this.lastTime) this.lastTime = timestamp;
+      if (!this.lastTime) {this.lastTime = timestamp;}
       const delta = timestamp - this.lastTime;
       this.lastTime = timestamp;
       this.render(timestamp, reducedMotion ? 0 : delta);

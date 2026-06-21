@@ -1,0 +1,48 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-var": "error",
+    "prefer-const": "error",
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "curly": ["error", "all"],
+    "no-duplicate-case": "error",
+    "no-empty": ["warn", { "allowEmptyCatch": false }],
+    "no-extra-semi": "error",
+    "no-unreachable": "error",
+    "no-self-assign": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    "no-debugger": "error",
+    "no-alert": "warn",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-param-reassign": ["warn", { "props": false }],
+    "prefer-arrow-callback": "warn",
+    "arrow-body-style": ["warn", "as-needed"],
+    "object-shorthand": ["warn", "always"],
+    "prefer-template": "warn",
+    "no-throw-literal": "error",
+    "require-await": "error",
+    "no-return-await": "error",
+    "no-promise-executor-return": "error"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "coverage/",
+    "dist/",
+    ".firebase/"
+  ]
+}

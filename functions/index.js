@@ -14,7 +14,7 @@ initializeApp();
 
 // Ensure critical environment variables exist at startup
 if (!process.env.GEMINI_API_KEY && process.env.FUNCTIONS_EMULATOR !== 'true') {
-  // eslint-disable-next-line no-console
+   
   console.warn('WARNING: GEMINI_API_KEY is not set in process.env!');
 }
 

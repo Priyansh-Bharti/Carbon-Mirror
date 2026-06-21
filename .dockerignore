@@ -1,0 +1,9 @@
+node_modules/
+.firebase/
+.git/
+.env
+.env.*
+coverage/
+dist/
+*.log
+functions/node_modules/

@@ -19,8 +19,10 @@ function sanitizeInput(msg) {
   if (typeof msg !== 'string' || msg.length > 500) {
     throw new HttpsError('invalid-argument', 'Input must be a string under 500 characters.');
   }
+  /* eslint-disable no-control-regex -- intentionally strips control characters for security sanitization */
   const clean = msg
     .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+  /* eslint-enable no-control-regex */
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -43,10 +45,10 @@ function sanitizeInput(msg) {
 async function checkRateLimit(db, userId) {
   const today = new Date().toISOString().split('T')[0];
   const ref = db.doc(`users/${userId}/rateLimits/coach_${today}`);
-  return await db.runTransaction(async (transaction) => {
+  return db.runTransaction(async transaction => {
     const snap = await transaction.get(ref);
     const count = snap.exists() ? (snap.data().count || 0) : 0;
-    if (count >= 20) return false;
+    if (count >= 20) {return false;}
     transaction.set(ref, { count: count + 1, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
     return true;
   });
@@ -60,10 +62,10 @@ async function checkRateLimit(db, userId) {
 function extractActions(text) {
   const actions = [];
   const lower = text.toLowerCase();
-  if (lower.includes('metro')) actions.push('metro_commute');
-  if (lower.includes('dry') || lower.includes('clothes')) actions.push('air_dry_clothes');
-  if (lower.includes('meatless') || lower.includes('vegetarian')) actions.push('meatless_mondays');
-  if (lower.includes('unplug') || lower.includes('standby')) actions.push('unplug_devices');
+  if (lower.includes('metro')) {actions.push('metro_commute');}
+  if (lower.includes('dry') || lower.includes('clothes')) {actions.push('air_dry_clothes');}
+  if (lower.includes('meatless') || lower.includes('vegetarian')) {actions.push('meatless_mondays');}
+  if (lower.includes('unplug') || lower.includes('standby')) {actions.push('unplug_devices');}
   return actions;
 }
 
@@ -73,7 +75,7 @@ function extractActions(text) {
  * @returns {string} Sanitized output.
  */
 function postProcessResponse(text) {
-  if (!text) return '';
+  if (!text) {return '';}
   let clean = text.replace(/https?:\/\/[^\s]+/gi, '[Link Removed]');
   clean = clean.replace(/[*#`_~]/g, '');
   if (clean.includes('Carbon Mirror AI Coach') && clean.length > 500) {
@@ -90,7 +92,7 @@ function postProcessResponse(text) {
  */
 async function callGemini(history, contextStr) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('Gemini API Key is missing.');
+  if (!apiKey) {throw new Error('Gemini API Key is missing.');}
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
@@ -109,7 +111,7 @@ async function callGemini(history, contextStr) {
   });
 
   const callPromise = chat.sendMessage(contextStr);
-  const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 10000));
+  const timeoutPromise = new Promise((_resolve, reject) => { setTimeout(() => reject(new Error('TIMEOUT')), 10000); });
   const result = await Promise.race([callPromise, timeoutPromise]);
   return result.response.text();
 }
@@ -149,7 +151,7 @@ export const geminiCoachHandler = onCall({
     const db = getFirestore();
     rateLimitPassed = await checkRateLimit(db, userId);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.warn('Firestore rate limit check failed, bypassing.', error.message);
   }
   if (!rateLimitPassed) {
@@ -164,7 +166,7 @@ export const geminiCoachHandler = onCall({
     const cleanReply = postProcessResponse(rawReply);
     return { reply: cleanReply, suggestedActions: extractActions(cleanReply) };
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.warn('Gemini call failed. Serving fallback.', error.message);
     const fallback = FALLBACK_RESPONSES[userContext.topEmission] || FALLBACK_RESPONSES.default;
     return { reply: fallback, suggestedActions: extractActions(fallback) };

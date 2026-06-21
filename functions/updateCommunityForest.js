@@ -44,7 +44,7 @@ async function aggregateCityStats(db, city, batch) {
   usersSnap.forEach((doc) => {
     const userData = doc.data();
     const footprint = userData.footprint;
-    if (!footprint) return;
+    if (!footprint) {return;}
 
     totalUsers += 1;
     scoreSum += footprint.planetScore || 0;

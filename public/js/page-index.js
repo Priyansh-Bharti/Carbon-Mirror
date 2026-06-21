@@ -42,7 +42,7 @@ function animateValue(el, target, duration, suffix = '') {
  */
 export function initLandingStats() {
   const cards = document.querySelectorAll('.glass-card .metric-lg');
-  if (cards.length < 3) return;
+  if (cards.length < 3) {return;}
 
   const targets = [
     { target: 2.2, suffix: 'T <span class="label-caps" style="color: var(--cm-color-accent-teal);">CO₂/Yr</span>' },
@@ -62,7 +62,7 @@ export function initLandingStats() {
   }, { threshold: 0.1 });
 
   const grid = document.getElementById('statistics-grid');
-  if (grid) observer.observe(grid);
+  if (grid) {observer.observe(grid);}
 }
 
 /**

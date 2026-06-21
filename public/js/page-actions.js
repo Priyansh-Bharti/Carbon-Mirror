@@ -53,16 +53,16 @@ function updateProjectedImpact(footprint, selected) {
  */
 async function saveCommitments(userId, selected) {
   const saveBtn = document.getElementById('save-actions-btn');
-  if (saveBtn) saveBtn.disabled = true;
+  if (saveBtn) {saveBtn.disabled = true;}
   try {
     await saveUserProfile(userId, { committedActions: selected });
     logger.info('Actions committed successfully to Firestore.');
     alert('Commitments saved to your planet profile successfully!');
   } catch (error) {
     logger.error('Failed to save commitments.', { message: error.message });
-    alert('Failed to save commitments: ' + error.message);
+    alert(`Failed to save commitments: ${  error.message}`);
   } finally {
-    if (saveBtn) saveBtn.disabled = false;
+    if (saveBtn) {saveBtn.disabled = false;}
   }
 }
 
@@ -89,7 +89,7 @@ function setupListeners(profile, userId) {
   if (profile.committedActions) {
     profile.committedActions.forEach(id => {
       const cb = document.getElementById(`action-${id}`);
-      if (cb) cb.checked = true;
+      if (cb) {cb.checked = true;}
     });
     updateProjectedImpact(footprint, getSelected());
   }

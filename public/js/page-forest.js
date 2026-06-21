@@ -19,7 +19,7 @@ let activeCity = 'Delhi';
  */
 function renderForestSVG(totalTrees, userTrees) {
   const svg = document.getElementById('forest-svg');
-  if (!svg) return;
+  if (!svg) {return;}
   svg.innerHTML = '';
 
   const width = svg.clientWidth || 800;
@@ -56,7 +56,7 @@ function renderForestSVG(totalTrees, userTrees) {
  */
 function renderLeaderboard(list) {
   const container = document.getElementById('leaderboard-list');
-  if (!container) return;
+  if (!container) {return;}
 
   if (!list || list.length === 0) {
     container.innerHTML = '<p class="body-md p-sm" style="color: var(--cm-color-text-muted);">No entries yet.</p>';
@@ -93,10 +93,10 @@ async function loadCityData(city, userId) {
       data = snap.data();
       localStorage.setItem(cacheKey, JSON.stringify(data));
     }
-  } catch (err) {
+  } catch (_err) {
     logger.warn('Firestore offline. Loading forest from cache.', { city });
     const cached = localStorage.getItem(cacheKey);
-    if (cached) data = JSON.parse(cached);
+    if (cached) {data = JSON.parse(cached);}
   }
 
   const uProfile = userId ? await getUserProfile(userId) : null;

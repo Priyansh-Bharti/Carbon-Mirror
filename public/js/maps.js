@@ -16,7 +16,7 @@ let googleMapsPromise = null;
  * @returns {Promise<void>} Resolves when the script is loaded.
  */
 export function loadGoogleMaps(apiKey) {
-  if (googleMapsPromise) return googleMapsPromise;
+  if (googleMapsPromise) {return googleMapsPromise;}
 
   googleMapsPromise = new Promise((resolve, reject) => {
     if (window.google && window.google.maps) {

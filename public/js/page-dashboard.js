@@ -21,7 +21,7 @@ const debouncedLoadLogs = debounce(loadAndRenderLogs, 300);
  */
 function setRingPercent(ringId, percent) {
   const ring = document.getElementById(ringId);
-  if (!ring) return;
+  if (!ring) {return;}
   const radius = ring.r.baseVal.value;
   const circumference = 2 * Math.PI * radius;
   ring.style.strokeDasharray = `${circumference} ${circumference}`;
@@ -34,7 +34,7 @@ function setRingPercent(ringId, percent) {
  * @param {number} total - Total annual emissions.
  */
 function renderEmissionsRings(breakdown, total) {
-  if (!breakdown || total <= 0) return;
+  if (!breakdown || total <= 0) {return;}
   const transportPct = Math.round((breakdown.transport / total) * 100);
   const homePct = Math.round((breakdown.home / total) * 100);
   const foodPct = Math.round((breakdown.food / total) * 100);
@@ -44,11 +44,11 @@ function renderEmissionsRings(breakdown, total) {
   setRingPercent('ring-food', foodPct);
 
   const tVal = document.getElementById('ring-val-transport');
-  if (tVal) tVal.textContent = `${transportPct}%`;
+  if (tVal) {tVal.textContent = `${transportPct}%`;}
   const hVal = document.getElementById('ring-val-home');
-  if (hVal) hVal.textContent = `${homePct}%`;
+  if (hVal) {hVal.textContent = `${homePct}%`;}
   const fVal = document.getElementById('ring-val-food');
-  if (fVal) fVal.textContent = `${foodPct}%`;
+  if (fVal) {fVal.textContent = `${foodPct}%`;}
 }
 
 /**
@@ -59,14 +59,14 @@ function renderEmissionsRings(breakdown, total) {
 function renderComparisonBar(userVal, avgVal) {
   const userBar = document.getElementById('comparison-bar-user');
   const avgBar = document.getElementById('comparison-bar-avg');
-  if (!userBar || !avgBar) return;
+  if (!userBar || !avgBar) {return;}
 
   const maxVal = Math.max(userVal, avgVal, 1);
   userBar.style.width = `${(userVal / maxVal) * 100}%`;
   avgBar.style.width = `${(avgVal / maxVal) * 100}%`;
 
   const userLabel = document.getElementById('comparison-label-user');
-  if (userLabel) userLabel.textContent = `You: ${formatCO2(userVal / 365.0)}/day`;
+  if (userLabel) {userLabel.textContent = `You: ${formatCO2(userVal / 365.0)}/day`;}
 }
 
 /**
@@ -75,7 +75,7 @@ function renderComparisonBar(userVal, avgVal) {
  */
 function renderTimeline(logs) {
   const container = document.getElementById('dashboard-timeline');
-  if (!container) return;
+  if (!container) {return;}
 
   if (logs.length === 0) {
     container.innerHTML = '<p class="body-md" style="color: var(--cm-color-text-muted);">No daily activity logs recorded yet.</p>';
@@ -127,7 +127,7 @@ async function loadDashboardData(userId) {
   let footprint = profile.footprint;
   if (!footprint && profile.quizAnswers) {
     const calc = calculateTotalFootprint(profile.quizAnswers);
-    if (!(calc instanceof Error)) footprint = calc;
+    if (!(calc instanceof Error)) {footprint = calc;}
   }
   if (!footprint) {
     footprint = { totalKgPerYear: 2200, breakdown: { transport: 800, home: 800, food: 600 }, planetScore: 50, planetState: 'stressed' };
@@ -163,8 +163,8 @@ export function initDashboardPage() {
     const content = document.getElementById('dashboard-content');
     try {
       await loadDashboardData(user.uid);
-      if (skeleton) skeleton.style.display = 'none';
-      if (content) content.style.display = 'block';
+      if (skeleton) {skeleton.style.display = 'none';}
+      if (content) {content.style.display = 'block';}
     } catch (err) {
       logger.error('Failed to load dashboard data.', { message: err.message });
     }

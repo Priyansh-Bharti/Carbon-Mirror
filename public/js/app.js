@@ -45,15 +45,15 @@ async function initApp() {
  * Executes page-specific logic based on DOM indicators.
  */
 function initializePages() {
-  if (document.getElementById('statistics-grid')) initLandingPage();
-  if (document.getElementById('quiz-form')) initQuizPage();
+  if (document.getElementById('statistics-grid')) {initLandingPage();}
+  if (document.getElementById('quiz-form')) {initQuizPage();}
   if (document.getElementById('dashboard-content') || document.getElementById('dashboard-skeleton')) {
     initDashboardPage();
   }
-  if (document.getElementById('actions-checklist-section')) initActionsPage();
-  if (document.getElementById('forest-svg')) initForestPage();
-  if (document.getElementById('coach-chat-form')) initCoachPage();
-  if (document.getElementById('share-canvas')) initCardPage();
+  if (document.getElementById('actions-checklist-section')) {initActionsPage();}
+  if (document.getElementById('forest-svg')) {initForestPage();}
+  if (document.getElementById('coach-chat-form')) {initCoachPage();}
+  if (document.getElementById('share-canvas')) {initCardPage();}
 }
 
 /**
@@ -152,7 +152,7 @@ function updateUIForSignedInUser(_user) {
   // Show protected links
   ['nav-link-dashboard', 'nav-link-actions', 'nav-link-coach', 'nav-link-share'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'inline-block';
+    if (el) {el.style.display = 'inline-block';}
   });
 }
 
@@ -174,7 +174,7 @@ function updateUIForSignedOutUser() {
   // Hide protected links
   ['nav-link-dashboard', 'nav-link-actions', 'nav-link-coach', 'nav-link-share'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) {el.style.display = 'none';}
   });
 }
 

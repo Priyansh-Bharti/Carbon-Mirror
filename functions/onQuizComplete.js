@@ -13,15 +13,15 @@ import { calculateTotalFootprint } from '../public/js/carbon.js';
  */
 export const onQuizCompleteHandler = onDocumentCreated('users/{userId}', async (event) => {
   const snap = event.data;
-  if (!snap) return;
+  if (!snap) {return;}
 
   const userData = snap.data();
   const quizAnswers = userData.quizAnswers;
-  if (!quizAnswers) return;
+  if (!quizAnswers) {return;}
 
   const footprint = calculateTotalFootprint(quizAnswers);
   if (footprint instanceof Error) {
-    // eslint-disable-next-line no-console
+     
     console.error('Carbon footprint calculation failed:', footprint.message);
     return;
   }

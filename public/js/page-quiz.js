@@ -26,7 +26,7 @@ const defaultAnswers = {
  * @returns {Promise<string>} The hex-encoded hash.
  */
 async function hashEmail(text) {
-  if (!text) return '';
+  if (!text) {return '';}
   const msgBuffer = new TextEncoder().encode(text.trim().toLowerCase());
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
   return Array.from(new Uint8Array(hashBuffer))
@@ -42,7 +42,7 @@ function loadAnswers() {
   try {
     const raw = localStorage.getItem(cacheKey);
     return raw ? JSON.parse(raw) : { ...defaultAnswers };
-  } catch (err) {
+  } catch (_err) {
     return { ...defaultAnswers };
   }
 }
@@ -65,13 +65,13 @@ function renderStep() {
     }
   }
   const prog = document.getElementById('quiz-progress-bar');
-  if (prog) prog.value = (currentStep / totalSteps) * 100;
+  if (prog) {prog.value = (currentStep / totalSteps) * 100;}
   const pct = document.getElementById('quiz-progress-percent');
-  if (pct) pct.textContent = `${Math.round((currentStep / totalSteps) * 100)}%`;
+  if (pct) {pct.textContent = `${Math.round((currentStep / totalSteps) * 100)}%`;}
   const prevBtn = document.getElementById('quiz-prev-btn');
-  if (prevBtn) prevBtn.disabled = currentStep === 1;
+  if (prevBtn) {prevBtn.disabled = currentStep === 1;}
   const nextBtnEl = document.getElementById('quiz-next-btn-text');
-  if (nextBtnEl) nextBtnEl.textContent = currentStep === totalSteps ? 'Submit' : 'Next Step';
+  if (nextBtnEl) {nextBtnEl.textContent = currentStep === totalSteps ? 'Submit' : 'Next Step';}
 }
 
 /**
@@ -114,14 +114,14 @@ async function submitQuiz(answers) {
     
     // Race the Firestore save against a timeout in case of slow/offline network queuing
     const savePromise = saveUserProfile(user.uid, profile);
-    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
+    const timeoutPromise = new Promise(resolve => { setTimeout(resolve, 2000); });
     await Promise.race([savePromise, timeoutPromise]);
 
     localStorage.removeItem(cacheKey);
     window.location.href = 'dashboard';
-  } catch (error) {
-    logger.error('Failed to submit quiz.', { message: error.message });
-    alert('Quiz save failed: ' + error.message);
+  } catch (_err) {
+    logger.error('Failed to submit quiz.', { message: _err.message });
+    alert(`Quiz save failed: ${  _err.message}`);
   }
 }
 
