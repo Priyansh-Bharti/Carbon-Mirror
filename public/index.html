@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Carbon Mirror helps you visualize and reduce your carbon footprint. Observe how your daily lifestyle choices shape a digital representation of Earth.">
+  <meta property="og:title" content="Carbon Mirror - Visualise Your Environmental Footprint">
+  <meta property="og:description" content="Calculate, track, and reduce your carbon footprint through gamification and AI coaching.">
+  <meta property="og:image" content="/assets/carbon_mirror_icon.png">
+  <title>Carbon Mirror - Visualise Your Environmental Footprint</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00E5C3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Performance: Preconnect to critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/planet.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <noscript>
+    <div style="background-color: #ffcc00; color: #333; padding: 10px; text-align: center; z-index: 9999; position: relative;">
+      <strong>JavaScript is disabled!</strong> Carbon Mirror requires JavaScript to calculate your footprint and render your planet.
+    </div>
+  </noscript>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Atmospheric Backgrounds -->
+  <div class="starfield" style="position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.2;"></div>
+  <div style="position: fixed; inset: 0; z-index: 0; background: linear-gradient(180deg, transparent, rgba(10, 14, 26, 0.5) 50%, var(--cm-color-bg-primary)); pointer-events: none;"></div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav" id="main-navigation">
+    <div class="nav-container">
+      <div class="headline-md font-bold" style="color: var(--cm-color-accent-teal);">
+        Carbon Mirror
+      </div>
+      <div class="flex gap-md align-center">
+        <a href="quiz" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none;" id="nav-link-quiz">Quiz</a>
+        <a href="dashboard" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-dashboard">Dashboard</a>
+        <a href="forest" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none;" id="nav-link-forest">Forest</a>
+        <button type="button" class="btn btn-ghost" id="auth-sign-in-btn">Sign In</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Entry Canvas -->
+  <main class="container page-canvas flex flex-col align-center" id="main-content">
+    <!-- Hero Section -->
+    <header class="text-center mb-lg fade-in-up" style="max-width: 800px; display: flex; flex-direction: column; align-items: center;">
+      <h1 class="display-lg mb-sm">
+        What does your planet look like?
+      </h1>
+      <p class="body-lg mb-md" style="color: rgba(240, 244, 255, 0.7); max-width: 600px;">
+        Your daily choices shape a living digital world. Take 5 minutes to calculate your impact and observe your planet's state.
+      </p>
+
+      <!-- CTA Action Button -->
+      <a href="quiz" class="btn btn-primary" id="landing-cta-btn">
+        <span>See My Planet</span>
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </a>
+    </header>
+
+    <!-- The Animated Planet Graphic -->
+    <section class="planet-wrapper fade-in-up delay-200" id="planet-orb-section" style="contain: layout style;">
+      <canvas id="planet-hero" width="480" height="480"
+        role="img"
+        aria-label="Your planet is thriving. Take the quiz to see your personal planet health score."></canvas>
+      <div aria-live="polite" aria-atomic="true" id="planet-score-announcement" class="sr-only"></div>
+    </section>
+
+    <!-- Regional and Goal Data Cards -->
+    <section class="grid grid-cols-3 mb-lg fade-in-up delay-300 w-full" id="statistics-grid">
+      <!-- Card 1 -->
+      <div class="glass-card">
+        <div class="metric-lg mb-sm" style="color: var(--cm-color-text-primary);">
+          2.2T <span class="label-caps" style="color: var(--cm-color-accent-teal);">CO₂/Yr</span>
+        </div>
+        <p class="body-md" style="color: var(--cm-color-text-muted);">
+          Average footprint for users in your region, highlighting areas for optimization.
+        </p>
+      </div>
+      <!-- Card 2 -->
+      <div class="glass-card">
+        <div class="metric-lg mb-sm" style="color: var(--cm-color-text-primary);">
+          70% <span class="label-caps" style="color: var(--cm-color-accent-gold);">Reduction</span>
+        </div>
+        <p class="body-md" style="color: var(--cm-color-text-muted);">
+          Potential emissions reduction by adopting a plant-centric, localized lifestyle.
+        </p>
+      </div>
+      <!-- Card 3 -->
+      <div class="glass-card">
+        <div class="metric-lg mb-sm" style="color: var(--cm-color-text-primary);">
+          1.5°C <span class="label-caps" style="color: var(--cm-color-accent-coral);">Target</span>
+        </div>
+        <p class="body-md" style="color: var(--cm-color-text-muted);">
+          Align your daily metrics with global sustainability goals in real-time.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Entry Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

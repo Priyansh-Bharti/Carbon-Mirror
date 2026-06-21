@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View your personal digital planet, track your monthly emissions breakdowns, and receive real-time carbon mitigation recommendations.">
+  <meta property="og:title" content="Your Planet Dashboard - Carbon Mirror">
+  <meta property="og:description" content="View your personal digital planet, track your monthly emissions breakdowns, and receive real-time carbon mitigation recommendations.">
+  <meta property="og:image" content="/assets/carbon_mirror_icon.png">
+  <title>Your Planet Dashboard - Carbon Mirror</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00E5C3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <!-- Performance: Preconnect to critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/planet.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <noscript>
+    <div style="background-color: #ffcc00; color: #333; padding: 10px; text-align: center; z-index: 9999; position: relative;">
+      <strong>JavaScript is disabled!</strong> Carbon Mirror requires JavaScript to calculate your footprint and render your planet.
+    </div>
+  </noscript>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Starfield Overlay -->
+  <div class="starfield" style="position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.15;"></div>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav" id="main-navigation">
+    <div class="nav-container">
+      <a href="/" class="headline-md font-bold" style="color: var(--cm-color-accent-teal); text-decoration: none;">Carbon Mirror</a>
+      <div class="flex gap-md align-center">
+        <a href="actions" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-actions">Action Lab</a>
+        <a href="forest" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none;" id="nav-link-forest">Forest</a>
+        <a href="coach" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-coach">AI Coach</a>
+        <a href="card" class="body-md-bold" style="color: var(--cm-color-accent-gold); text-decoration: none; display: none;" id="nav-link-share">Share Card</a>
+        <button type="button" class="btn btn-ghost" id="auth-sign-out-btn">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Skeleton Loader -->
+  <div id="dashboard-skeleton" style="padding: 120px 0; text-align: center; width: 100%; max-width: 600px; margin: 0 auto;">
+    <div class="glass-card flex flex-col align-center gap-md">
+      <div class="typing-dot-1 inline-block bg-teal w-sm h-sm rounded-full mr-xs" style="width: 12px; height: 12px; background: var(--cm-color-accent-teal);"></div>
+      <div class="typing-dot-2 inline-block bg-teal w-sm h-sm rounded-full mr-xs" style="width: 12px; height: 12px; background: var(--cm-color-accent-teal);"></div>
+      <div class="typing-dot-3 inline-block bg-teal w-sm h-sm rounded-full" style="width: 12px; height: 12px; background: var(--cm-color-accent-teal);"></div>
+      <p class="body-lg" style="color: var(--cm-color-text-muted);">Syncing planet telemetry...</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <main class="container page-canvas" id="main-content" style="padding-top: 100px;">
+    <div id="dashboard-content" style="display: none;">
+      <div class="grid grid-cols-2">
+        <!-- Left Column: Planet Visualization -->
+        <section class="flex flex-col align-center fade-in-up" id="dashboard-planet-section" style="contain: layout style;">
+          <h1 class="headline-lg text-center mb-sm" id="user-planet-title">Your Planet Status</h1>
+          <div class="planet-wrapper" style="padding: 16px 0;">
+            <canvas id="planet-dashboard" width="480" height="480"
+              role="img"
+              aria-label="Your planet health score is loading."
+              aria-describedby="planet-score-desc"></canvas>
+          </div>
+          <!-- Live region announces score updates to screen readers -->
+          <div aria-live="polite" aria-atomic="true" id="planet-score-announcement" class="sr-only"></div>
+          <p id="planet-score-desc" class="sr-only">Planet health score visualization. Higher scores indicate lower carbon emissions and a healthier planet.</p>
+          <p class="body-md text-center" style="color: var(--cm-color-accent-teal);" id="user-score-status">Regeneration Active</p>
+        </section>
+
+        <!-- Right Column: Emissions Data Breakdowns -->
+        <section class="flex flex-col gap-lg fade-in-up delay-200" id="dashboard-metrics-section">
+          <!-- Main Stats Card -->
+          <div class="glass-card">
+            <h2 class="label-caps mb-sm" style="color: var(--cm-color-text-muted);">Current Annual Footprint</h2>
+            <div class="display-lg" id="dashboard-total-score">
+              0.0 <span class="label-caps" style="font-size: 20px;">Tons CO₂e</span>
+            </div>
+            <p class="body-md mt-sm" style="color: var(--cm-color-text-muted);">
+              Calculated based on your daily commute, diet, and electricity inputs.
+            </p>
+          </div>
+
+          <!-- Emissions Categories Rings -->
+          <div class="glass-card">
+            <h2 class="body-md-bold mb-md" style="color: var(--cm-color-text-primary);">Emissions Breakdown</h2>
+
+            <div class="flex justify-around align-center gap-md py-sm" style="width: 100%;">
+              <!-- Ring 1: Transport -->
+              <div class="flex flex-col align-center gap-sm">
+                <div style="position: relative; width: 80px; height: 80px;">
+                  <svg width="80" height="80" transform="rotate(-90 40 40)">
+                    <circle cx="40" cy="40" r="34" stroke="var(--cm-color-outline)" stroke-width="6" fill="transparent" />
+                    <circle id="ring-transport" cx="40" cy="40" r="34" stroke="var(--cm-color-accent-teal)" stroke-width="6" fill="transparent" stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;" />
+                  </svg>
+                  <span id="ring-val-transport" class="metric-sm" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">0%</span>
+                </div>
+                <span class="label-caps" style="font-size: 10px;">Transport</span>
+              </div>
+
+              <!-- Ring 2: Home -->
+              <div class="flex flex-col align-center gap-sm">
+                <div style="position: relative; width: 80px; height: 80px;">
+                  <svg width="80" height="80" transform="rotate(-90 40 40)">
+                    <circle cx="40" cy="40" r="34" stroke="var(--cm-color-outline)" stroke-width="6" fill="transparent" />
+                    <circle id="ring-home" cx="40" cy="40" r="34" stroke="var(--cm-color-accent-gold)" stroke-width="6" fill="transparent" stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;" />
+                  </svg>
+                  <span id="ring-val-home" class="metric-sm" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">0%</span>
+                </div>
+                <span class="label-caps" style="font-size: 10px;">Home Energy</span>
+              </div>
+
+              <!-- Ring 3: Food -->
+              <div class="flex flex-col align-center gap-sm">
+                <div style="position: relative; width: 80px; height: 80px;">
+                  <svg width="80" height="80" transform="rotate(-90 40 40)">
+                    <circle cx="40" cy="40" r="34" stroke="var(--cm-color-outline)" stroke-width="6" fill="transparent" />
+                    <circle id="ring-food" cx="40" cy="40" r="34" stroke="var(--cm-color-accent-sage)" stroke-width="6" fill="transparent" stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;" />
+                  </svg>
+                  <span id="ring-val-food" class="metric-sm" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">0%</span>
+                </div>
+                <span class="label-caps" style="font-size: 10px;">Diet</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comparison Bar Card -->
+          <div class="glass-card flex flex-col gap-md">
+            <h2 class="body-md-bold" style="color: var(--cm-color-text-primary);">You vs Delhi Average</h2>
+
+            <div class="flex flex-col gap-sm">
+              <div class="flex justify-between label-caps" style="font-size: 11px;">
+                <span id="comparison-label-user">You: 0T/day</span>
+                <span class="label-caps" style="color: var(--cm-color-accent-teal);">Target</span>
+              </div>
+              <div style="background: var(--cm-color-bg-surface-dark); height: 16px; border-radius: var(--cm-radius-full); overflow: hidden; width: 100%;">
+                <div id="comparison-bar-user" style="background: var(--cm-color-accent-teal); height: 100%; width: 0%; transition: width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-sm">
+              <div class="flex justify-between label-caps" style="font-size: 11px;">
+                <span>Delhi Average</span>
+                <span style="color: var(--cm-color-accent-coral);">2.2 Tons/Yr</span>
+              </div>
+              <div style="background: var(--cm-color-bg-surface-dark); height: 16px; border-radius: var(--cm-radius-full); overflow: hidden; width: 100%;">
+                <div id="comparison-bar-avg" style="background: var(--cm-color-accent-coral); height: 100%; width: 0%; transition: width 0.8s ease;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carbon Story Timeline -->
+          <div class="glass-card">
+            <h2 class="body-md-bold mb-md" style="color: var(--cm-color-text-primary);">Carbon Story Timeline</h2>
+            <ol id="dashboard-timeline" style="list-style: none; padding: 0; margin: 0;"></ol>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Module Entry -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

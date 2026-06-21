@@ -1,0 +1,165 @@
+/* Keyframes and Motion Rules */
+
+/* Cinematic Starfield Drift */
+@keyframes starDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -1000px 500px;
+  }
+}
+
+/* Planet Orb Rotation */
+@keyframes rotateOrb {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse Glow Keyframes */
+@keyframes pulseGlowHealthy {
+  0% {
+    box-shadow: 0 0 60px 10px rgba(0, 229, 195, 0.2), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 90px 20px rgba(0, 229, 195, 0.35), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+}
+
+@keyframes pulseGlowModerate {
+  0% {
+    box-shadow: 0 0 60px 10px rgba(201, 168, 76, 0.2), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 90px 20px rgba(201, 168, 76, 0.35), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+}
+
+@keyframes pulseGlowHighImpact {
+  0% {
+    box-shadow: 0 0 60px 15px rgba(255, 92, 53, 0.25), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 100px 25px rgba(255, 92, 53, 0.45), inset -20px -20px 60px rgba(10, 14, 26, 0.9);
+  }
+}
+
+/* High Impact Alarm Flicker / Heat Haze Effect */
+@keyframes flickerHighImpact {
+  0%, 100% {
+    filter: brightness(1) contrast(1);
+  }
+  50% {
+    filter: brightness(0.97) contrast(1.03);
+  }
+}
+
+/* Page Element Fade-In-Up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* CSS Classes */
+.starfield {
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, var(--cm-color-text-primary), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, var(--cm-color-text-primary), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, var(--cm-color-text-primary), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, var(--cm-color-text-primary), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, var(--cm-color-text-primary), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 160px 120px, var(--cm-color-text-primary), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: starDrift 120s linear infinite;
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fadeInUp 0.8s var(--cm-transition-normal) forwards;
+}
+
+/* Animation Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Spec Keyframes & Classes */
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes orbitGlow {
+  0% {
+    box-shadow: 0 0 30px rgba(0, 229, 195, 0.15);
+  }
+  100% {
+    box-shadow: 0 0 60px rgba(0, 229, 195, 0.3);
+  }
+}
+
+@keyframes typingDot {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes treeGrow {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fade-rise {
+  opacity: 0;
+  animation: fadeRise 0.6s var(--cm-transition-normal) forwards;
+}
+
+.tree-grow {
+  transform-origin: bottom center;
+  animation: treeGrow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.typing-dot-1 { animation: typingDot 1.2s infinite ease-in-out; }
+.typing-dot-2 { animation: typingDot 1.2s infinite ease-in-out 0.2s; }
+.typing-dot-3 { animation: typingDot 1.2s infinite ease-in-out 0.4s; }
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+

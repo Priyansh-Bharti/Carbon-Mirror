@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. DEFAULT DENY POLICY
+    // By default, block all read and write requests to all collections.
+    // Explicit access is granted on a per-collection basis below.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for security validation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 2. USER DOCUMENTS: users/{userId}
+    // NoSQL Design Choice: We store user profile, quiz response, and carbon footprint summary 
+    // together in one document. This allows the client to fetch all key stats in a single document read,
+    // minimizing database lookups and keeping reads highly efficient.
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      // Enforce client-side write security
+      allow write: if isOwner(userId)
+        // 2a. Footprint Lock: Only Cloud Functions can calculate and write footprint values.
+        // We prevent the client from passing a 'footprint' key in their write request.
+        && !request.resource.data.keys().hasAny(['footprint'])
+        
+        // 2b. Quiz Type and Range Validations
+        && (
+          !request.resource.data.keys().hasAny(['quizAnswers']) || (
+            request.resource.data.quizAnswers.transport.mode is string
+            && request.resource.data.quizAnswers.transport.distanceKm is number
+            && request.resource.data.quizAnswers.transport.distanceKm >= 0.0
+            && request.resource.data.quizAnswers.home.cookingFuel in ['lpg', 'gas', 'firewood', 'electric']
+            && request.resource.data.quizAnswers.home.electricityKwhPerMonth is number
+            && request.resource.data.quizAnswers.home.electricityKwhPerMonth >= 0.0
+            && request.resource.data.quizAnswers.home.acHoursPerDay is number
+            && request.resource.data.quizAnswers.home.acHoursPerDay >= 0.0
+            && request.resource.data.quizAnswers.home.acHoursPerDay <= 24.0
+            && request.resource.data.quizAnswers.home.householdSize is int
+            && request.resource.data.quizAnswers.home.householdSize >= 1
+            && request.resource.data.quizAnswers.food.dietType in ['vegan', 'vegetarian', 'occasional_meat', 'regular_meat', 'heavy_meat']
+            && (
+              !request.resource.data.quizAnswers.keys().hasAny(['flights']) || 
+              request.resource.data.quizAnswers.flights.flightsPerYear is number
+            )
+          )
+        );
+    }
+
+    // 3. DAILY ACTIVITY LOGS: users/{userId}/logs/{date}
+    // NoSQL Design Choice: Subcollection grouping per user ensures that logs are naturally 
+    // segmented and isolated. This allows Firestore rules to restrict log reads/writes 
+    // directly at the parent path level, preventing a user from scanning other users' logs.
+    match /users/{userId}/logs/{date} {
+      // Allow read/write only if the authenticated user is the owner
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId)
+        // 3a. Date Format validation: Document ID (date) must be in YYYY-MM-DD format
+        && date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        
+        // 3b. Range check: Ensure daily emissions columns are valid numbers between 0 and 100 kg
+        && request.resource.data.transportKg is number
+        && request.resource.data.transportKg >= 0.0 && request.resource.data.transportKg <= 100.0
+        && request.resource.data.homeKg is number
+        && request.resource.data.homeKg >= 0.0 && request.resource.data.homeKg <= 100.0
+        && request.resource.data.foodKg is number
+        && request.resource.data.foodKg >= 0.0 && request.resource.data.foodKg <= 100.0
+        && request.resource.data.totalKg is number
+        && request.resource.data.totalKg >= 0.0 && request.resource.data.totalKg <= 100.0
+        
+        // 3c. Optional Notes validation: Notes must be under 500 characters
+        && (
+          !request.resource.data.keys().hasAny(['notes']) || (
+            request.resource.data.notes is string 
+            && request.resource.data.notes.size() <= 500
+          )
+        )
+
+        // 3d. Prevent backdating more than 1 day (24 hours in milliseconds)
+        && (request.time.toMillis() - timestamp.value(date + 'T00:00:00Z').toMillis()) <= 86400000;
+    }
+
+    // 4. COMMUNITY METRICS: community/{city}
+    // NoSQL Design Choice: Aggregated city profiles are stored separately to make public regional 
+    // awareness features cheap to read without exposing individual user profile documents.
+    match /community/{city} {
+      // Anyone can read aggregated city statistics for regional comparison
+      allow read: if true;
+      // 4a. Write-protected: Cloud Function Admin SDK bypasses Firestore rules entirely.
+      // Client-side writes are completely blocked by this rule.
+      allow write: if false;
+    }
+
+    // 5. RATE LIMITING GUIDANCE
+    // SECURITY NOTE: Firestore security rules do not support request rate-limiting or quota controls.
+    // Rate-limiting for API calls is enforced inside our server-side Cloud Functions by validating
+    // Firebase App Check tokens and recording message counters inside user Firestore records.
+  }
+}

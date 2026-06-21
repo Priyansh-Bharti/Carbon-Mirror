@@ -1,0 +1,193 @@
+/* Layout and Spacing Utilities */
+
+/* ── Accessibility Utilities ──────────────────────────────────────────────── */
+
+/**
+ * Visually hides content but keeps it accessible to screen readers.
+ * WCAG 2.2 technique C7: Using CSS to hide a portion of link text.
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/**
+ * Skip navigation link — hidden until focused via keyboard.
+ * Meets WCAG 2.4.1 (Bypass Blocks) — Level A.
+ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+  background: var(--cm-color-bg-surface);
+  color: var(--cm-color-accent-teal);
+  padding: 12px 20px;
+  border-radius: var(--cm-radius-default);
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid var(--cm-color-accent-teal);
+  transition: none;
+}
+
+.skip-link:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* ── Focus Visible ────────────────────────────────────────────────────────── */
+
+/**
+ * Global focus-visible ring — ensures all interactive elements
+ * meet WCAG 2.4.11 (Focus Appearance) at AA level.
+ */
+:focus-visible {
+  outline: 2px solid var(--cm-color-accent-teal);
+  outline-offset: 3px;
+  border-radius: var(--cm-radius-sm);
+}
+
+
+.container {
+  width: 100%;
+  max-width: var(--cm-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--cm-spacing-gutter);
+  padding-right: var(--cm-spacing-gutter);
+}
+
+/* Page spacing wrappers */
+.page-canvas {
+  position: relative;
+  z-index: 10;
+  padding-top: 120px; /* Accounts for fixed navbar */
+  padding-bottom: var(--cm-spacing-section-desktop);
+}
+
+@media (max-width: 768px) {
+  .page-canvas {
+    padding-bottom: var(--cm-spacing-section-mobile);
+  }
+}
+
+/* Flexbox utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.gap-sm {
+  gap: var(--cm-spacing-base);
+}
+
+.gap-md {
+  gap: var(--cm-spacing-stack-sm);
+}
+
+.gap-lg {
+  gap: var(--cm-spacing-stack-md);
+}
+
+/* Grid layout utilities */
+.grid {
+  display: grid;
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cm-spacing-gutter);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cm-spacing-gutter);
+}
+
+@media (max-width: 768px) {
+  .grid-cols-3,
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stack margins */
+.mb-sm {
+  margin-bottom: var(--cm-spacing-stack-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--cm-spacing-stack-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--cm-spacing-stack-lg);
+}
+
+/* Text alignment */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Width & Flex Utilities */
+.w-full {
+  width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Responsive Grid Span Utilities */
+.col-span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+  .col-span-2 {
+    grid-column: span 1;
+  }
+}

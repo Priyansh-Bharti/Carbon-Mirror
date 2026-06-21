@@ -1,0 +1,84 @@
+/* Planet Orb Visual Metaphor */
+
+.planet-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: var(--cm-spacing-stack-lg) 0;
+}
+
+.planet-orb {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  transition: background var(--cm-transition-slow), box-shadow var(--cm-transition-slow);
+}
+
+/* Texture Overlay to simulate a rotating planet's surface grid */
+.planet-orb::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background-image: repeating-radial-gradient(
+    circle at center,
+    transparent 0,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 2px
+  );
+  background-size: 15px 15px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* STATE 1: Healthy (Bioluminescent Teal) */
+.planet-healthy {
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--cm-color-accent-teal),
+    var(--cm-color-bg-primary),
+    #05070D
+  );
+  box-shadow: 
+    0 0 60px 10px rgba(0, 229, 195, 0.2),
+    inset -20px -20px 60px rgba(10, 14, 26, 0.9),
+    inset 10px 10px 30px rgba(240, 244, 255, 0.2);
+  animation: rotateOrb 40s linear infinite, pulseGlowHealthy 4s ease-in-out infinite alternate;
+}
+
+/* STATE 2: Moderate (Dust Gold / Amber) */
+.planet-moderate {
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--cm-color-accent-gold),
+    var(--cm-color-bg-primary),
+    #05070D
+  );
+  box-shadow: 
+    0 0 60px 10px rgba(201, 168, 76, 0.2),
+    inset -20px -20px 60px rgba(10, 14, 26, 0.9),
+    inset 10px 10px 30px rgba(240, 244, 255, 0.2);
+  animation: rotateOrb 50s linear infinite, pulseGlowModerate 5s ease-in-out infinite alternate;
+}
+
+/* STATE 3: High Impact (Ember Coral) */
+.planet-high-impact {
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--cm-color-accent-coral),
+    var(--cm-color-bg-primary),
+    #05070D
+  );
+  box-shadow: 
+    0 0 60px 15px rgba(255, 92, 53, 0.25),
+    inset -20px -20px 60px rgba(10, 14, 26, 0.9),
+    inset 10px 10px 30px rgba(240, 244, 255, 0.1);
+  animation: rotateOrb 20s linear infinite, pulseGlowHighImpact 2s ease-in-out infinite alternate, flickerHighImpact 0.15s ease-in-out infinite;
+}

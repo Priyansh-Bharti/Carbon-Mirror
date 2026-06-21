@@ -1,0 +1,26 @@
+{
+  "name": "carbon-mirror",
+  "version": "1.0.0",
+  "description": "Carbon Mirror - Carbon footprint awareness web application for PromptWars 2026",
+  "main": "functions/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --experimental-test-coverage",
+    "test:unit": "node --test tests/unit/**/*.test.js --experimental-test-coverage",
+    "test:watch": "node --test --watch",
+    "lint:secrets": "grep -rinE 'AIza|p2-o-fcb5d|maps.googleapis.com.*key=' public/ functions/ || echo \"No hardcoded secrets found.\"",
+    "predeploy": "npm run lint:secrets && npm run test",
+    "deploy": "firebase deploy"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@playwright/test": "^1.61.0",
+    "jest": "^29.7.0"
+  },
+  "private": true
+}

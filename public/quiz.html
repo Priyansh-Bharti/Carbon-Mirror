@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculate your personal carbon emissions with our quick 5-minute onboarding quiz. Get customized advice on your dietary, travel, and household habits.">
+  <meta property="og:title" content="Lifestyle Quiz - Carbon Mirror Onboarding">
+  <meta property="og:description" content="Calculate your personal carbon emissions with our quick 5-minute onboarding quiz.">
+  <meta property="og:image" content="/assets/carbon_mirror_icon.png">
+  <title>Lifestyle Quiz - Carbon Mirror Onboarding</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00E5C3">
+
+  <!-- Performance: Preconnect to critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/planet.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <noscript>
+    <div style="background-color: #ffcc00; color: #333; padding: 10px; text-align: center; z-index: 9999; position: relative;">
+      <strong>JavaScript is disabled!</strong> Carbon Mirror requires JavaScript to calculate your footprint and render your planet.
+    </div>
+  </noscript>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="top-nav" id="main-navigation">
+    <div class="nav-container">
+      <a href="/" class="headline-md font-bold" style="color: var(--cm-color-accent-teal); text-decoration: none;">Carbon Mirror</a>
+      <span class="body-md-bold" style="color: var(--cm-color-text-primary);">Lifestyle Quiz</span>
+    </div>
+  </nav>
+
+  <!-- Main quiz canvas -->
+  <main class="container page-canvas flex flex-col align-center" id="main-content">
+    <header class="text-center mb-md fade-in-up" style="max-width: 600px;">
+      <h1 class="headline-lg mb-sm">Let's shape your planet</h1>
+      <p class="body-md" style="color: var(--cm-color-text-muted);">
+        Answer a few simple questions about your weekly habits. Your answers will generate your planet's unique visual state.
+      </p>
+    </header>
+
+    <!-- Quiz Form Container -->
+    <section class="glass-card fade-in-up delay-100" style="width: 100%; max-width: 650px;" id="quiz-container">
+      <!-- Progress Indicator -->
+      <div class="flex justify-between align-center mb-md">
+        <span class="label-caps" id="quiz-step-title">Your Progress</span>
+        <span class="metric-sm" id="quiz-progress-percent" style="color: var(--cm-color-accent-teal);">25%</span>
+      </div>
+      <div class="mb-lg">
+        <progress id="quiz-progress-bar" value="25" max="100" style="width: 100%; height: 8px; border-radius: var(--cm-radius-full); accent-color: var(--cm-color-accent-teal);"></progress>
+      </div>
+
+      <!-- Interactive Quiz Form -->
+      <form id="quiz-form">
+        <!-- Step 1: City &amp; Transport -->
+        <fieldset id="quiz-step-1" class="flex flex-col gap-md" style="border: none; padding: 0; margin: 0;">
+          <legend class="body-md-bold mb-sm" style="color: var(--cm-color-text-primary);">Step 1: City &amp; Transportation</legend>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-city" class="body-md">Select your primary city in India:</label>
+            <select id="quiz-city" class="form-input" style="background-color: var(--cm-color-bg-surface-dark);" required>
+              <option value="Delhi">Delhi</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Bengaluru">Bengaluru</option>
+              <option value="Chennai">Chennai</option>
+              <option value="Hyderabad">Hyderabad</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-transport-mode" class="body-md">Primary daily commute mode:</label>
+            <select id="quiz-transport-mode" class="form-input" style="background-color: var(--cm-color-bg-surface-dark);" required>
+              <option value="motorcycle">Motorcycle / Scooter</option>
+              <option value="petrol_car">Petrol Car</option>
+              <option value="diesel_car">Diesel Car</option>
+              <option value="auto_rickshaw_cng">Auto Rickshaw (CNG)</option>
+              <option value="metro_delhi">Metro Transit</option>
+              <option value="bus_delhi">City Bus</option>
+              <option value="cycle_walk">Cycle / Walk</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-transport-distance" class="body-md">Daily round-trip commute distance (km):</label>
+            <input type="number" id="quiz-transport-distance" class="form-input" placeholder="e.g. 20" min="0" required>
+          </div>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-flights" class="body-md">Number of flights taken per year:</label>
+            <input type="number" id="quiz-flights" class="form-input" placeholder="e.g. 2" min="0" required>
+          </div>
+        </fieldset>
+
+        <!-- Step 2: Home Energy -->
+        <fieldset id="quiz-step-2" class="flex flex-col gap-md" style="border: none; padding: 0; margin: 0; display: none;">
+          <legend class="body-md-bold mb-sm" style="color: var(--cm-color-text-primary);">Step 2: Home Energy</legend>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-home-fuel" class="body-md">Primary household cooking fuel:</label>
+            <select id="quiz-home-fuel" class="form-input" style="background-color: var(--cm-color-bg-surface-dark);" required>
+              <option value="lpg">LPG Cylinder</option>
+              <option value="gas">Piped Natural Gas (PNG)</option>
+              <option value="electric">Induction / Electric Stove</option>
+              <option value="firewood">Firewood</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-home-electricity" class="body-md">Monthly household electricity bill (kWh):</label>
+            <input type="number" id="quiz-home-electricity" class="form-input" placeholder="e.g. 150" min="0" required>
+          </div>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-home-ac" class="body-md">Average Air Conditioning (AC) usage hours per day:</label>
+            <input type="number" id="quiz-home-ac" class="form-input" placeholder="e.g. 4" min="0" max="24" required>
+          </div>
+        </fieldset>
+
+        <!-- Step 3: Household Details -->
+        <fieldset id="quiz-step-3" class="flex flex-col gap-md" style="border: none; padding: 0; margin: 0; display: none;">
+          <legend class="body-md-bold mb-sm" style="color: var(--cm-color-text-primary);">Step 3: Household Details</legend>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-home-size" class="body-md">Total number of people in your household:</label>
+            <input type="number" id="quiz-home-size" class="form-input" placeholder="e.g. 3" min="1" required>
+          </div>
+        </fieldset>
+
+        <!-- Step 4: Food habits -->
+        <fieldset id="quiz-step-4" class="flex flex-col gap-md" style="border: none; padding: 0; margin: 0; display: none;">
+          <legend class="body-md-bold mb-sm" style="color: var(--cm-color-text-primary);">Step 4: Dietary Habits</legend>
+
+          <div class="flex flex-col gap-sm">
+            <label for="quiz-food-diet" class="body-md">Primary diet classification:</label>
+            <select id="quiz-food-diet" class="form-input" style="background-color: var(--cm-color-bg-surface-dark);" required>
+              <option value="vegetarian">Vegetarian (Includes dairy, no meat)</option>
+              <option value="vegan">Vegan (Strictly plant-based)</option>
+              <option value="occasional_meat">Occasional Meat (Fish / poultry occasionally)</option>
+              <option value="regular_meat">Regular Meat (Daily chicken / fish)</option>
+              <option value="heavy_meat">Heavy Meat (Frequent red meat)</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <!-- Actions -->
+        <div class="flex justify-between align-center mt-lg">
+          <button type="button" class="btn btn-ghost" id="quiz-prev-btn" disabled>Back</button>
+          <button type="submit" class="btn btn-primary" id="quiz-next-btn">
+            <span id="quiz-next-btn-text">Next Step</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Module Entry -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

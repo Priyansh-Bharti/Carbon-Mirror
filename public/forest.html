@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore the Community Forest, where every tree represents real carbon emissions reduced by users in Delhi, Mumbai, Bengaluru, Chennai, and Hyderabad.">
+  <meta property="og:title" content="Community Forest - Carbon Mirror">
+  <meta property="og:description" content="Explore the Community Forest, where every tree represents real carbon emissions reduced by users.">
+  <meta property="og:image" content="/assets/carbon_mirror_icon.png">
+  <title>Community Forest - Carbon Mirror</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00E5C3">
+
+  <!-- Performance: Preconnect to critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/planet.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <style>
+    .pill {
+      background: transparent;
+      border: 1px solid var(--cm-color-outline);
+      color: var(--cm-color-text-muted);
+      padding: 8px 16px;
+      border-radius: var(--cm-radius-full);
+      cursor: pointer;
+      font-family: var(--cm-font-body);
+      font-weight: 500;
+      transition: var(--cm-transition-fast);
+      outline: none;
+    }
+    .pill:hover, .active-pill {
+      background: var(--cm-color-accent-teal);
+      color: var(--cm-color-text-dark);
+      border-color: var(--cm-color-accent-teal);
+    }
+    @keyframes pulseMyTree {
+      0% { filter: drop-shadow(0 0 2px var(--cm-color-accent-teal)); }
+      100% { filter: drop-shadow(0 0 12px var(--cm-color-accent-teal)); }
+    }
+    .my-tree {
+      animation: pulseMyTree 2s infinite alternate;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="background-color: #ffcc00; color: #333; padding: 10px; text-align: center; z-index: 9999; position: relative;">
+      <strong>JavaScript is disabled!</strong> Carbon Mirror requires JavaScript to calculate your footprint and render your planet.
+    </div>
+  </noscript>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="top-nav" id="main-navigation">
+    <div class="nav-container">
+      <a href="/" class="headline-md font-bold" style="color: var(--cm-color-accent-teal); text-decoration: none;">Carbon Mirror</a>
+      <div class="flex gap-md align-center">
+        <a href="dashboard" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-dashboard">Dashboard</a>
+        <a href="actions" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-actions">Action Lab</a>
+        <a href="coach" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-coach">AI Coach</a>
+        <button type="button" class="btn btn-ghost" id="auth-sign-out-btn">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Forest Layout -->
+  <main class="container page-canvas flex flex-col gap-lg" id="main-content" style="padding-top: 100px;">
+    <header class="text-left fade-in-up" style="max-width: 700px;">
+      <h1 class="headline-lg mb-sm">Community Forest</h1>
+      <p class="body-lg" style="color: var(--cm-color-text-muted);">
+        Observe trees programmatically planted by users. Every 0.1 Tons of carbon saved below the global average grows a new tree.
+      </p>
+    </header>
+
+    <!-- Filter Pills -->
+    <section class="flex gap-sm flex-wrap fade-in-up delay-100" id="city-pills-section" aria-label="Filter forest by city">
+      <button type="button" class="pill active-pill" id="pill-Delhi" aria-pressed="true">Delhi</button>
+      <button type="button" class="pill" id="pill-Mumbai" aria-pressed="false">Mumbai</button>
+      <button type="button" class="pill" id="pill-Bengaluru" aria-pressed="false">Bengaluru</button>
+      <button type="button" class="pill" id="pill-Chennai" aria-pressed="false">Chennai</button>
+      <button type="button" class="pill" id="pill-Hyderabad" aria-pressed="false">Hyderabad</button>
+    </section>
+
+    <div class="grid grid-cols-3 fade-in-up delay-200 w-full">
+      <!-- Left: Programmatic SVG Forest -->
+      <section class="flex flex-col gap-md col-span-2">
+        <div style="position: relative; width: 100%; min-height: 350px; background: var(--cm-color-bg-surface-dark); border-radius: var(--cm-radius-md); border: 1px solid var(--cm-color-outline); overflow: hidden;">
+          <svg id="forest-svg" width="100%" height="350" aria-label="Visual representation of trees planted by the community" role="img" style="display: block; width: 100%; height: 350px;"></svg>
+        </div>
+
+        <!-- Quick stats cards -->
+        <div class="grid grid-cols-3 gap-md" style="width: 100%;">
+          <div class="glass-card text-center" style="padding: 12px;">
+            <div class="metric-lg" id="forest-total-users" style="color: var(--cm-color-accent-teal);">0</div>
+            <span class="label-caps" style="font-size: 9px;">Total Users</span>
+          </div>
+          <div class="glass-card text-center" style="padding: 12px;">
+            <div class="metric-lg" id="forest-total-trees" style="color: var(--cm-color-accent-gold);">0</div>
+            <span class="label-caps" style="font-size: 9px;">Trees Planted</span>
+          </div>
+          <div class="glass-card text-center" style="padding: 12px;">
+            <div class="metric-lg" id="forest-avg-score" style="color: var(--cm-color-accent-sage);">0/100</div>
+            <span class="label-caps" style="font-size: 9px;">Average Score</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: City Weekly Leaderboard -->
+      <section class="glass-card flex flex-col" id="leaderboard-section">
+        <h2 class="body-md-bold mb-md" style="color: var(--cm-color-text-primary);">Weekly Leaderboard</h2>
+        <div id="leaderboard-list" class="flex flex-col gap-sm" style="flex: 1; overflow-y: auto; max-height: 320px;">
+          <div class="typing-dot-1 inline-block bg-teal w-sm h-sm rounded-full mr-xs" style="width: 8px; height: 8px; background: var(--cm-color-accent-teal);"></div>
+          <p class="body-md">Retrieving leaderboard rankings...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Module Entry -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

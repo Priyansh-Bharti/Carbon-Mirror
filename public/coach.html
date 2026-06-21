@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Talk to your Carbon Mirror AI Coach, get customized advice for reducing emissions in India, and learn about solar or metro transit savings.">
+  <meta property="og:title" content="AI Carbon Coach - Carbon Mirror">
+  <meta property="og:description" content="Talk to your Carbon Mirror AI Coach and get customized advice for reducing emissions.">
+  <meta property="og:image" content="/assets/carbon_mirror_icon.png">
+  <title>AI Carbon Coach - Carbon Mirror</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00E5C3">
+
+  <!-- Performance: Preconnect to critical origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/planet.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <style>
+    .chat-message {
+      padding: 12px 16px;
+      border-radius: var(--cm-radius-md);
+      border: 1px solid var(--cm-color-outline);
+      max-width: 80%;
+      margin-bottom: 16px;
+      word-wrap: break-word;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--cm-color-bg-surface);
+      border-color: rgba(0, 229, 195, 0.4);
+      color: var(--cm-color-text-primary);
+    }
+    .msg-coach {
+      align-self: flex-start;
+      background: var(--cm-color-bg-surface-dark);
+      border-color: var(--cm-color-outline);
+      color: var(--cm-color-text-primary);
+    }
+    .prompt-chip {
+      background: transparent;
+      border: 1px solid var(--cm-color-outline);
+      color: var(--cm-color-text-muted);
+      padding: 6px 12px;
+      border-radius: var(--cm-radius-full);
+      cursor: pointer;
+      font-size: 13px;
+      transition: var(--cm-transition-fast);
+      outline: none;
+      white-space: nowrap;
+    }
+    .prompt-chip:hover {
+      background: var(--cm-color-bg-surface);
+      border-color: var(--cm-color-accent-teal);
+      color: var(--cm-color-text-primary);
+    }
+    .prompt-chip:focus-visible {
+      outline: 2px solid var(--cm-color-accent-teal);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="background-color: #ffcc00; color: #333; padding: 10px; text-align: center; z-index: 9999; position: relative;">
+      <strong>JavaScript is disabled!</strong> Carbon Mirror requires JavaScript to calculate your footprint and render your planet.
+    </div>
+  </noscript>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="top-nav" id="main-navigation">
+    <div class="nav-container">
+      <a href="/" class="headline-md font-bold" style="color: var(--cm-color-accent-teal); text-decoration: none;">Carbon Mirror</a>
+      <div class="flex gap-md align-center">
+        <a href="dashboard" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-dashboard">Dashboard</a>
+        <a href="actions" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none; display: none;" id="nav-link-actions">Action Lab</a>
+        <a href="forest" class="body-md" style="color: var(--cm-color-text-muted); text-decoration: none;" id="nav-link-forest">Forest</a>
+        <button type="button" class="btn btn-ghost" id="auth-sign-out-btn">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main AI Coach Interface -->
+  <main class="container page-canvas flex flex-col align-center gap-md" id="main-content" style="padding-top: 100px;">
+    <header class="text-center mb-sm" style="max-width: 600px;">
+      <h1 class="headline-lg mb-xs">AI Carbon Coach</h1>
+      <p class="body-md" style="color: var(--cm-color-text-muted);">
+        Get localized suggestions focused on Indian clean energy habits, metro transit, and solar subsidies.
+        <span id="coach-rate-limit-badge" style="color: var(--cm-color-accent-gold); font-weight: bold; margin-left: var(--cm-spacing-base);">Messages: 0/20 today</span>
+      </p>
+    </header>
+
+    <!-- Chat Display Logger -->
+    <div class="glass-card flex flex-col" style="width: 100%; max-width: 700px; height: 420px; border-radius: var(--cm-radius-md); padding: var(--cm-spacing-gutter);">
+      <div id="chat-log" role="log" aria-live="polite" aria-label="Conversation" class="flex flex-col" style="flex: 1; overflow-y: auto; padding-right: 8px;">
+        <!-- Initial Welcoming Message -->
+        <div class="chat-message msg-coach">
+          <p class="body-md" style="margin: 0;">Namaste! I am your Carbon Coach. How can I help you adjust your lifestyle metrics to move closer to net-zero today?</p>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="typing-indicator" style="display: none; align-items: center; gap: 6px; padding: 12px; margin-top: 8px; border-radius: var(--cm-radius-md); width: fit-content; background: var(--cm-color-bg-surface-dark);">
+        <div class="typing-dot-1" style="width: 8px; height: 8px; border-radius: 50%; background: var(--cm-color-accent-teal);"></div>
+        <div class="typing-dot-2" style="width: 8px; height: 8px; border-radius: 50%; background: var(--cm-color-accent-teal);"></div>
+        <div class="typing-dot-3" style="width: 8px; height: 8px; border-radius: 50%; background: var(--cm-color-accent-teal);"></div>
+      </div>
+    </div>
+
+    <!-- Suggested prompt chips -->
+    <section class="flex gap-sm flex-wrap justify-center" style="width: 100%; max-width: 700px;" id="chips-section">
+      <button type="button" class="prompt-chip" data-prompt="How do I get the PM Surya Ghar solar subsidy?">PM Surya Ghar Solar</button>
+      <button type="button" class="prompt-chip" data-prompt="What are the carbon benefits of switching to the Delhi Metro?">Delhi Metro Impact</button>
+      <button type="button" class="prompt-chip" data-prompt="Can you give me vegetarian recipe alternatives to lower my diet score?">Meatless Alternatives</button>
+    </section>
+
+    <!-- Form input box -->
+    <form id="coach-chat-form" class="flex gap-sm align-center" style="width: 100%; max-width: 700px; padding-bottom: 24px;">
+      <label for="coach-textarea" class="sr-only">Ask your Carbon Coach a question</label>
+      <textarea id="coach-textarea" placeholder="Ask your Carbon Coach..." required
+        style="flex: 1; height: 48px; min-height: 48px; max-height: 120px; resize: none; padding: 12px 16px; border-radius: var(--cm-radius-default);"
+        class="form-input" aria-label="Message to Carbon Coach"></textarea>
+      <button type="submit" id="coach-send-btn" class="btn btn-primary" aria-label="Send message to Carbon Coach" style="padding: 12px; border-radius: var(--cm-radius-full); width: 48px; height: 48px;">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 20px;">send</span>
+      </button>
+    </form>
+  </main>
+
+  <!-- Module Entry -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
