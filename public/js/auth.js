@@ -64,7 +64,7 @@ export async function signInWithGoogle() {
     return result.user;
   } catch (error) {
     logger.error('Google Sign-In failed.', { code: error.code, message: error.message });
-    throw new Error(`Authentication Error: ${error.message}`);
+    throw new Error(`Authentication Error: ${error.message}`, { cause: error });
   }
 }
 
@@ -79,7 +79,7 @@ export async function signOutUser() {
     logger.info('User signed out successfully.');
   } catch (error) {
     logger.error('Sign-out operation failed.', { code: error.code, message: error.message });
-    throw new Error(`Sign-out Error: ${error.message}`);
+    throw new Error(`Sign-out Error: ${error.message}`, { cause: error });
   }
 }
 

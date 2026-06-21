@@ -3,6 +3,11 @@ import js from '@eslint/js';
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   js.configs.recommended,
+  // --- Global ignore patterns (replaces legacy .eslintignore) ---
+  {
+    ignores: ['node_modules/', 'coverage/', 'dist/', '.firebase/', 'public/assets/', '**/*.min.js'],
+  },
+  // --- Main application rules ---
   {
     languageOptions: {
       ecmaVersion: 2022,
@@ -24,8 +29,6 @@ export default [
         sessionStorage: 'readonly',
         location: 'readonly',
         history: 'readonly',
-        alert: 'readonly',
-        confirm: 'readonly',
         performance: 'readonly',
         self: 'readonly',
         crypto: 'readonly',
@@ -78,7 +81,7 @@ export default [
       'use-isnan': 'error',
       'valid-typeof': 'error',
       'no-debugger': 'error',
-      'no-alert': 'warn',
+      'no-alert': 'error',
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
@@ -89,21 +92,23 @@ export default [
       'object-shorthand': ['warn', 'always'],
       'prefer-template': 'warn',
       'no-throw-literal': 'error',
-      // require-await: disabled — some async functions are intentionally
-      // async for interface consistency (e.g., initApp orchestrator).
+      // require-await is intentionally off: some async functions are async
+      // for interface consistency (e.g., the initApp orchestrator pattern).
       'require-await': 'off',
       'no-return-await': 'error',
-      // preserve-caught-error: disabled — overly strict for this codebase;
-      // all catch blocks already log the original error via logger.error.
       'no-loss-of-precision': 'error',
       'no-promise-executor-return': 'error',
-      // preserve-caught-error: disabled — all catch blocks log the original via
-      // logger.error / console.warn with error.message. Adding { cause } would
-      // change the thrown type and break upstream callers.
-      'preserve-caught-error': 'off',
     },
   },
+  // --- Cloud Functions directory override ---
+  // no-control-regex is disabled here because sanitizeInput in geminiProxy.js
+  // intentionally matches control characters (U+0000–U+001F, U+007F–U+009F)
+  // for server-side prompt-injection prevention. This is a deliberate security
+  // pattern, not a code quality issue.
   {
-    ignores: ['node_modules/', 'coverage/', 'dist/', '.firebase/', 'public/assets/', '**/*.min.js'],
+    files: ['functions/**/*.js'],
+    rules: {
+      'no-control-regex': 'off',
+    },
   },
 ];

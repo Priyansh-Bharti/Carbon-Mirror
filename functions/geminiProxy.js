@@ -20,10 +20,8 @@ function sanitizeInput(msg) {
   if (typeof msg !== 'string' || msg.length > 500) {
     throw new HttpsError('invalid-argument', 'Input must be a string under 500 characters.');
   }
-  /* eslint-disable no-control-regex -- intentionally strips control characters for security sanitization */
   const clean = msg
     .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-  /* eslint-enable no-control-regex */
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

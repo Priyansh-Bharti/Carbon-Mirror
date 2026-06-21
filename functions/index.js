@@ -5,6 +5,7 @@
  */
 
 import { initializeApp } from 'firebase-admin/app';
+import { logger } from 'firebase-functions/v2';
 import { onQuizCompleteHandler } from './onQuizComplete.js';
 import { geminiCoachHandler } from './geminiProxy.js';
 import { updateCommunityForestHandler } from './updateCommunityForest.js';
@@ -14,8 +15,7 @@ initializeApp();
 
 // Ensure critical environment variables exist at startup
 if (!process.env.GEMINI_API_KEY && process.env.FUNCTIONS_EMULATOR !== 'true') {
-   
-  console.warn('WARNING: GEMINI_API_KEY is not set in process.env!');
+  logger.warn('GEMINI_API_KEY is not set. Gemini Coach calls will fail in production.');
 }
 
 // Export secure Cloud Functions
